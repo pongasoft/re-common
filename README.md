@@ -18,7 +18,7 @@ Depending on feedback and which direction Reason Studios decide to go, this may 
 
 # List of projects using this mini framework
 
-* [CVA-7](https://github.com/pongasoft/re-cva-7):
+* [CVA-7](https://github.com/pongasoft/re-cva-7): free rack extension utility which lets you analyze a CV signal in various ways
 
 # License
 
