@@ -6,13 +6,14 @@
 #include "JBoxProperty.h"
 #include "JBoxPropertyManager.h"
 
-#ifndef  __phdsp__
+#ifdef LOCAL_NATIVE_BUILD
 
 #include <iostream>
+#include <logging/logging.h>
 
-TJBox_Tag const IGNORED_PROPERTY_TAG =  kJBox_CVInputValue;
+constexpr TJBox_Tag IGNORED_PROPERTY_TAG =  kJBox_CVInputValue;
 
-#endif // !__phdsp__
+#endif // LOCAL_NATIVE_BUILD
 
 JBoxPropertyManager::JBoxPropertyManager() :
   fPropertiesForUpdate(compare), fNoteStates(nullptr)
@@ -25,7 +26,7 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
 
   if(iDiffCount != 0)
   {
-    JBoxPropertyMap::const_iterator vNotFound = fPropertiesForUpdate.cend();
+    auto vNotFound = fPropertiesForUpdate.cend();
 
     // handle regular updates first
     for(TJBox_UInt32 i = 0; i < iDiffCount; i++)
@@ -39,15 +40,14 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
       }
 
       JBoxPropertyKey key(iPropertyDiff.fPropertyRef.fObject, iPropertyDiff.fPropertyTag);
-      JBoxPropertyMap::const_iterator iter =
-        fPropertiesForUpdate.find(key);
+      auto iter = fPropertiesForUpdate.find(key);
 
       if(iter != vNotFound)
       {
         stateChanged |= iter->second->update(iPropertyDiff);
       }
 
-#ifndef  __phdsp__
+#ifdef LOCAL_NATIVE_BUILD
       if(iPropertyDiff.fPropertyTag != IGNORED_PROPERTY_TAG)
       {
         TJBox_Value values[] = {
@@ -65,6 +65,9 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
           JBOX_TRACEVALUES("onUpdate: /notFound@^0 : ^1 -> ^2", values, 3);
         }
       }
+#endif
+
+      #ifndef  __phdsp__
 #endif // !__phdsp__
 
 //      TJBox_Value values[] = {
@@ -87,8 +90,8 @@ bool JBoxPropertyManager::onNotesUpdate(const TJBox_PropertyDiff *iPropertyDiffs
                                         TJBox_UInt32 iDiffCount,
                                         JBoxNoteListener *iListener)
 {
-  JBOX_ASSERT(fNoteStates != nullptr);
-  JBOX_ASSERT(iListener != nullptr);
+  DCHECK_F(fNoteStates != nullptr);
+  DCHECK_F(iListener != nullptr);
 
   bool stateChanged = false;
 
@@ -112,25 +115,20 @@ bool JBoxPropertyManager::onNotesUpdate(const TJBox_PropertyDiff *iPropertyDiffs
 void JBoxPropertyManager::registerForUpdate(IJBoxPropertyObserver &iJBoxProperty, TJBox_Tag iTag)
 {
   JBoxPropertyKey key(iJBoxProperty.getPropertyRef().fObject, iTag);
-  JBOX_ASSERT_MESSAGE(fPropertiesForUpdate.find(key) == fPropertiesForUpdate.cend(), iJBoxProperty.getPropertyRef().fKey);
+  DCHECK_F(fPropertiesForUpdate.find(key) == fPropertiesForUpdate.cend(), "Key not found [%s]", iJBoxProperty.getPropertyRef().fKey);
   fPropertiesForUpdate[key] = &iJBoxProperty;
-#ifndef  __phdsp__
-  JBOX_TRACE((std::string("reg4Update: ") + iJBoxProperty.getPropertyPath() + "@" + std::to_string(iJBoxProperty.getPropertyRef().fObject) + "/" + std::to_string(iTag)).c_str());
-#endif // !__phdsp__
-
+  DLOG_F(INFO, "reg4Update: %s@%d/%d", iJBoxProperty.getPropertyPath(), iJBoxProperty.getPropertyRef().fObject, iTag);
 }
 
 void JBoxPropertyManager::registerForInit(IJBoxPropertyObserver &iJBoxProperty)
 {
   fPropertiesForInit.push_back(&iJBoxProperty);
-#ifndef  __phdsp__
-  JBOX_TRACE((std::string("reg4Init: ") + iJBoxProperty.getPropertyPath() + "@" + std::to_string(iJBoxProperty.getPropertyRef().fObject)).c_str());
-#endif // !__phdsp__
+  DLOG_F(INFO, "reg4Init: %s@%d", iJBoxProperty.getPropertyPath(), iJBoxProperty.getPropertyRef().fObject);
 }
 
 void JBoxPropertyManager::initProperties()
 {
-  JBOX_TRACE("JBoxPropertyManager::initProperties()");
+  DLOG_F(INFO, "JBoxPropertyManager::initProperties()");
 
   for(auto &&property : fPropertiesForInit)
   {
@@ -140,9 +138,7 @@ void JBoxPropertyManager::initProperties()
 
 void JBoxPropertyManager::registerNoteStates(JBoxNoteStates &iNoteStates)
 {
-#ifndef  __phdsp__
-  JBOX_TRACE((std::string("registerNoteStates: ") + iNoteStates.fObjectPath + "@" + std::to_string(iNoteStates.fObjectRef)).c_str());
-#endif // !__phdsp__
+  DLOG_F(INFO, "registerNoteStates: %s@%d", iNoteStates.fObjectPath, iNoteStates.fObjectRef);
   fNoteStates = &iNoteStates;
 }
 
