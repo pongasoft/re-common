@@ -5,12 +5,11 @@
 #include <Jukebox.h>
 #include "JBoxProperty.h"
 #include "JBoxPropertyManager.h"
+#include <logging/logging.h>
 
 #ifdef LOCAL_NATIVE_BUILD
 
 #include <iostream>
-#include <logging/logging.h>
-
 constexpr TJBox_Tag IGNORED_PROPERTY_TAG =  kJBox_CVInputValue;
 
 #endif // LOCAL_NATIVE_BUILD

@@ -5,6 +5,7 @@
 #include "JukeboxTypes.h"
 #include <stddef.h> // to define size_t
 #include <cmath>
+#include <limits>
 
 #define JBOX_ASSERT_RANGE(v, min, max) JBOX_ASSERT((v) >= (min) && (v) <= (max))
 
@@ -26,6 +27,8 @@ const TJBox_Int32 kMidiC4 = kMidiC3 + 12;
 
 const TJBox_Float64 MIN_CV_VALUE = -10000;
 const TJBox_Float64 MAX_CV_VALUE = 10000;
+
+constexpr auto MAX_TJbox_Float64 = std::numeric_limits<TJBox_Float64>::max();
 
 template <typename T>
 inline static T clamp(TJBox_Float64 value, int lower, int upper)
