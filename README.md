@@ -20,6 +20,11 @@ Depending on feedback and which direction Reason Studios decide to go, this may 
 
 - [CVA-7](https://github.com/pongasoft/re-cva-7): free rack extension utility which lets you analyze a CV signal in various ways
 
+# Misc
+
+- This project uses [loguru](https://github.com/emilk/loguru) for logging (included under `src/cpp/logging`)
+
+
 # License
 
 - This project is released under the terms of the [Apache 2.0 license](LICENSE.txt)
