@@ -41,6 +41,7 @@ set(re-common_BUILD_HEADERS
     ${RE_COMMON_CPP_SRC_DIR}/Utils.h
     ${RE_COMMON_CPP_SRC_DIR}/Volume.h
     ${RE_COMMON_CPP_SRC_DIR}/XFade.h
+    ${RE_COMMON_CPP_SRC_DIR}/logging/logging.h
   )
 
 # Define the sources for native build only

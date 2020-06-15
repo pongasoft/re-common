@@ -1,8 +1,10 @@
-# Introduction
+Introduction
+------------
 
 This project contains the common code used across pongasoft rack extensions (for Reason DAW by Reason Studios)
 
-# History
+History
+-------
 
 In 2015, I started working on Rack Extensions for Reason and created this mini framework to share code across the various rack extensions subsequently released.
 
@@ -16,16 +18,35 @@ Note that this project was designed with the [SDK version 2.2](https://developer
 
 Depending on feedback and which direction Reason Studios decide to go, this may turn into something bigger...
 
-# List of projects using this mini framework
+List of projects using this mini framework
+------------------------------------------
 
 - [CVA-7](https://github.com/pongasoft/re-cva-7): free rack extension utility which lets you analyze a CV signal in various ways
 
-# Misc
+Release notes
+-------------
+
+#### 1.1.0 - TBD
+
+- Added logging (loguru) and `re-common.cmake` for inclusion in other projects
+
+
+#### 1.0.1 - 2020/02/21
+
+- Added details and README.
+
+#### 1.0.0 - 2020/02/15
+
+- First release.
+
+Misc
+----
 
 - This project uses [loguru](https://github.com/emilk/loguru) for logging (included under `src/cpp/logging`)
 
 
-# License
+License
+-------
 
 - This project is released under the terms of the [Apache 2.0 license](LICENSE.txt)
 
