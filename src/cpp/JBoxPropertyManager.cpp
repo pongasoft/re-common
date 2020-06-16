@@ -7,12 +7,12 @@
 #include "JBoxPropertyManager.h"
 #include <logging/logging.h>
 
-#ifdef LOCAL_NATIVE_BUILD
+#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
 
 #include <iostream>
 constexpr TJBox_Tag IGNORED_PROPERTY_TAG =  kJBox_CVInputValue;
 
-#endif // LOCAL_NATIVE_BUILD
+#endif // RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
 
 JBoxPropertyManager::JBoxPropertyManager() :
   fPropertiesForUpdate(compare), fNoteStates(nullptr)
@@ -46,7 +46,7 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
         stateChanged |= iter->second->update(iPropertyDiff);
       }
 
-#ifdef LOCAL_NATIVE_BUILD
+#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
       if(iPropertyDiff.fPropertyTag != IGNORED_PROPERTY_TAG)
       {
         TJBox_Value values[] = {
@@ -66,9 +66,7 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
       }
 #endif
 
-      #ifndef  __phdsp__
-#endif // !__phdsp__
-
+//#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
 //      TJBox_Value values[] = {
 //        JBox_MakeBoolean(iter != vNotFound),
 //        JBox_MakeNumber(iPropertyDiff.fPropertyRef.fObject),
@@ -78,6 +76,7 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
 //
 //      JBOX_TRACEVALUES("JBoxPropertyObserver::onUpdate @^1 : ^2 -> ^3 (^0)", values, 4);
 //      JBOX_TRACE(iPropertyDiff.fPropertyRef.fKey);
+//#endif
 
     }
   }
@@ -116,18 +115,26 @@ void JBoxPropertyManager::registerForUpdate(IJBoxPropertyObserver &iJBoxProperty
   JBoxPropertyKey key(iJBoxProperty.getPropertyRef().fObject, iTag);
   DCHECK_F(fPropertiesForUpdate.find(key) == fPropertiesForUpdate.cend(), "Key not found [%s]", iJBoxProperty.getPropertyRef().fKey);
   fPropertiesForUpdate[key] = &iJBoxProperty;
+
+#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
   DLOG_F(INFO, "reg4Update: %s@%d/%d", iJBoxProperty.getPropertyPath(), iJBoxProperty.getPropertyRef().fObject, iTag);
+#endif
 }
 
 void JBoxPropertyManager::registerForInit(IJBoxPropertyObserver &iJBoxProperty)
 {
   fPropertiesForInit.push_back(&iJBoxProperty);
+
+#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
   DLOG_F(INFO, "reg4Init: %s@%d", iJBoxProperty.getPropertyPath(), iJBoxProperty.getPropertyRef().fObject);
+#endif
 }
 
 void JBoxPropertyManager::initProperties()
 {
+#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
   DLOG_F(INFO, "JBoxPropertyManager::initProperties()");
+#endif
 
   for(auto &&property : fPropertiesForInit)
   {
@@ -137,7 +144,10 @@ void JBoxPropertyManager::initProperties()
 
 void JBoxPropertyManager::registerNoteStates(JBoxNoteStates &iNoteStates)
 {
+#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
   DLOG_F(INFO, "registerNoteStates: %s@%d", iNoteStates.fObjectPath, iNoteStates.fObjectRef);
+#endif
+
   fNoteStates = &iNoteStates;
 }
 
