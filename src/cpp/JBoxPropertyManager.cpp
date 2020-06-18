@@ -49,32 +49,23 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
 #if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
       if(iPropertyDiff.fPropertyTag != IGNORED_PROPERTY_TAG)
       {
-        TJBox_Value values[] = {
-          JBox_MakeNumber(iPropertyDiff.fPropertyTag),
-          iPropertyDiff.fPreviousValue,
-          iPropertyDiff.fCurrentValue
-        };
-
         if(iter != vNotFound)
         {
-          JBOX_TRACEVALUES((std::string("onUpdate: ") + iter->second->getPropertyPath() + "@^0 : ^1 -> ^2").c_str(), values, 3);
+          JBOX_LOGVALUES((std::string("onUpdate: ") + iter->second->getPropertyPath() + "@^0 : ^1 -> ^2").c_str(), JBox_MakeNumber(iPropertyDiff.fPropertyTag), iPropertyDiff.fPreviousValue, iPropertyDiff.fCurrentValue);
         }
         else
         {
-          JBOX_TRACEVALUES("onUpdate: /notFound@^0 : ^1 -> ^2", values, 3);
+          JBOX_LOGVALUES("onUpdate: /notFound@^0 : ^1 -> ^2", JBox_MakeNumber(iPropertyDiff.fPropertyTag), iPropertyDiff.fPreviousValue, iPropertyDiff.fCurrentValue);
         }
       }
 #endif
 
 //#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
-//      TJBox_Value values[] = {
-//        JBox_MakeBoolean(iter != vNotFound),
-//        JBox_MakeNumber(iPropertyDiff.fPropertyRef.fObject),
-//        iPropertyDiff.fPreviousValue,
-//        iPropertyDiff.fCurrentValue
-//      };
-//
-//      JBOX_TRACEVALUES("JBoxPropertyObserver::onUpdate @^1 : ^2 -> ^3 (^0)", values, 4);
+//      JBOX_LOGVALUES("JBoxPropertyObserver::onUpdate @^1 : ^2 -> ^3 (^0)",
+//                     JBox_MakeBoolean(iter != vNotFound),
+//                     JBox_MakeNumber(iPropertyDiff.fPropertyRef.fObject),
+//                     iPropertyDiff.fPreviousValue,
+//                     iPropertyDiff.fCurrentValue);
 //      JBOX_TRACE(iPropertyDiff.fPropertyRef.fKey);
 //#endif
 

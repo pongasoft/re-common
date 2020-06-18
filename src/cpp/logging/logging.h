@@ -27,3 +27,49 @@
 #endif // LOCAL_NATIVE_BUILD
 
 #include "loguru.hpp"
+
+#include <JukeboxTypes.h>
+
+/**
+ * Implementation details
+ */
+namespace impl {
+inline void JBox_LogValues_fillValue(TJBox_Value *iValues, int iIndex)
+{
+}
+
+template<typename... Args>
+inline void JBox_LogValues_fillValue(TJBox_Value *iValues, int iIndex, TJBox_Value iValue, Args&& ...iRest)
+{
+  iValues[iIndex] = iValue;
+  JBox_LogValues_fillValue(iValues, iIndex + 1, std::forward<Args>(iRest)...);
+}
+
+template<typename... Args>
+inline void JBox_LogValues(const char iFile[], TJBox_Int32 iLine, char const *iMessage, Args&& ...iValues)
+{
+  TJBox_Value values[sizeof...(iValues)];
+  JBox_LogValues_fillValue(values, 0, std::forward<Args>(iValues)...);
+  JBox_TraceValues(iFile, iLine, iMessage, values, sizeof...(iValues));
+}
+}
+
+#if DEBUG
+/**
+ * Allow to write simpler code:
+ * ```
+ *    // using JBOX_TRACEVALUES
+ * 		TJBox_Value instanceIDValue = JBox_MakeNumber(JBox_GetNumber(iParams[0]));
+ *		TJBox_Value array[1];
+ *		array[0] = instanceIDValue;
+ *		JBOX_TRACEVALUES("instance ID = ^0", array, 1);
+ *
+ *    // using JBOX_LOGVALUES
+ *		JBOX_LOGVALUES("instance ID = ^0", iParams[0]));
+ * ```
+ */
+#define JBOX_LOGVALUES(iMessage, ...) \
+	impl::JBox_LogValues(__FILE__, __LINE__, iMessage, __VA_ARGS__)
+#else
+#define JBOX_LOGVALUES(iMessage, ...)
+#endif
