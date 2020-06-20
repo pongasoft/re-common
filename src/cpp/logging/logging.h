@@ -34,22 +34,10 @@
  * Implementation details
  */
 namespace impl {
-inline void JBox_LogValues_fillValue(TJBox_Value *iValues, int iIndex)
-{
-}
-
-template<typename... Args>
-inline void JBox_LogValues_fillValue(TJBox_Value *iValues, int iIndex, TJBox_Value iValue, Args&& ...iRest)
-{
-  iValues[iIndex] = iValue;
-  JBox_LogValues_fillValue(iValues, iIndex + 1, std::forward<Args>(iRest)...);
-}
-
 template<typename... Args>
 inline void JBox_LogValues(const char iFile[], TJBox_Int32 iLine, char const *iMessage, Args&& ...iValues)
 {
-  TJBox_Value values[sizeof...(iValues)];
-  JBox_LogValues_fillValue(values, 0, std::forward<Args>(iValues)...);
+  TJBox_Value values[sizeof...(iValues)] { iValues... };
   JBox_TraceValues(iFile, iLine, iMessage, values, sizeof...(iValues));
 }
 }

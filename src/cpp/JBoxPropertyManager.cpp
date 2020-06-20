@@ -7,11 +7,10 @@
 #include "JBoxPropertyManager.h"
 #include <logging/logging.h>
 
-#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
-
-#include <iostream>
+#if LOCAL_NATIVE_BUILD && RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
+// Can only include <string> in native build
+#include <string>
 constexpr TJBox_Tag IGNORED_PROPERTY_TAG =  kJBox_CVInputValue;
-
 #endif // RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
 
 JBoxPropertyManager::JBoxPropertyManager() :
@@ -46,7 +45,7 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
         stateChanged |= iter->second->update(iPropertyDiff);
       }
 
-#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
+#if LOCAL_NATIVE_BUILD && RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING && DEBUG
       if(iPropertyDiff.fPropertyTag != IGNORED_PROPERTY_TAG)
       {
         if(iter != vNotFound)
@@ -60,7 +59,7 @@ bool JBoxPropertyManager::onUpdate(TJBox_PropertyDiff const iPropertyDiffs[], TJ
       }
 #endif
 
-//#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
+//#if RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING && DEBUG
 //      JBOX_LOGVALUES("JBoxPropertyObserver::onUpdate @^1 : ^2 -> ^3 (^0)",
 //                     JBox_MakeBoolean(iter != vNotFound),
 //                     JBox_MakeNumber(iPropertyDiff.fPropertyRef.fObject),
