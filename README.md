@@ -12,9 +12,11 @@ In January 2020, Reason studios opened up the RE platform to allow sharing and d
 
 As a result, I have decided to make the code publicly available in the hope that it can help other people to bootstrap their efforts in learning the platform.
 
-Note that this is not a full fledged and well designed framework (like the Jamba VST framework). More a set of concepts and common code used throughout the other projects. The code is, at this time, not well documented.
+> #### Note
+> This is not a full fledged and well designed framework (like the Jamba VST framework). More a set of concepts and common code used throughout the other projects. The code is, at this time, not well documented.
 
-Note that this project was designed with the [SDK version 2.2](https://developer.reasonstudios.com/documentation/JukeboxReadme#_whats_new_in_sdk_2_2_0) in mind (which has the advantage of allowing REs to run with Reason 8). As a result the code does not use C++17 which is a new feature since 4.0.
+> #### Note
+> This project was originally created with RE SDK version 2.2. Although the latest version of this project assumes 4.1+ and some features requires C++17, at this time, not everything has been updated to use the latest features.
 
 Depending on feedback and which direction Reason Studios decide to go, this may turn into something bigger...
 
@@ -26,10 +28,11 @@ List of projects using this mini framework
 Release notes
 -------------
 
-#### 1.1.0 - TBD
+#### 2.0.0 - 2020/06/20
 
+- Assumes RE SDK Version 4.1.0+
+- Use C++17 features 
 - Added logging (loguru) and `re-common.cmake` for inclusion in other projects
-
 
 #### 1.0.1 - 2020/02/21
 
