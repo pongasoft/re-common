@@ -25,6 +25,7 @@ set(re-common_BUILD_SOURCES
     ${RE_COMMON_CPP_SRC_DIR}/JBoxProperty.cpp
     ${RE_COMMON_CPP_SRC_DIR}/JBoxPropertyManager.cpp
     ${RE_COMMON_CPP_SRC_DIR}/JukeboxExports.cpp
+    ${RE_COMMON_CPP_SRC_DIR}/jbox.cpp
   )
 
 # Defines the headers if you want to include them in your project (optional)
@@ -32,6 +33,8 @@ set(re-common_BUILD_HEADERS
     ${RE_COMMON_CPP_SRC_DIR}/AudioBuffer.h
     ${RE_COMMON_CPP_SRC_DIR}/AudioSocket.h
     ${RE_COMMON_CPP_SRC_DIR}/CVSocket.h
+    ${RE_COMMON_CPP_SRC_DIR}/fmt.h
+    ${RE_COMMON_CPP_SRC_DIR}/jbox.h
     ${RE_COMMON_CPP_SRC_DIR}/CircularBuffer.h
     ${RE_COMMON_CPP_SRC_DIR}/CommonDevice.h
     ${RE_COMMON_CPP_SRC_DIR}/Constants.h
@@ -39,6 +42,7 @@ set(re-common_BUILD_HEADERS
     ${RE_COMMON_CPP_SRC_DIR}/JBoxPropertyManager.h
     ${RE_COMMON_CPP_SRC_DIR}/JukeboxExports.h
     ${RE_COMMON_CPP_SRC_DIR}/Utils.h
+    ${RE_COMMON_CPP_SRC_DIR}/StaticString.h
     ${RE_COMMON_CPP_SRC_DIR}/Volume.h
     ${RE_COMMON_CPP_SRC_DIR}/XFade.h
     ${RE_COMMON_CPP_SRC_DIR}/logging/logging.h

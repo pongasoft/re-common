@@ -16,6 +16,12 @@
  * @author Yan Pujante
  */
 
+#pragma once
+
+#ifndef __PongasoftCommon_logging_h__
+#define __PongasoftCommon_logging_h__
+
+
 // Implementation note: when doing jbox builds, loguru.cpp cannot be compiled because it relies on includes
 // (like atomic) which are not part of the RE SDK due to sandboxing, as a result we disable logging in this instance
 #if LOCAL_NATIVE_BUILD && DEBUG
@@ -60,4 +66,6 @@ inline void JBox_LogValues(const char iFile[], TJBox_Int32 iLine, char const *iM
 	impl::JBox_LogValues(__FILE__, __LINE__, iMessage, __VA_ARGS__)
 #else
 #define JBOX_LOGVALUES(iMessage, ...)
+#endif
+
 #endif

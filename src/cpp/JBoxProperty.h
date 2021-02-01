@@ -8,18 +8,15 @@
 #ifndef __PongasoftCommon_JBoxProperty_h__
 #define __PongasoftCommon_JBoxProperty_h__
 
+#include "StaticString.h"
+#include "jbox.h"
 #include <Jukebox.h>
 #include "Constants.h"
 #include "JBoxPropertyManager.h"
 #include "JukeboxTypes.h"
+#include "logging/logging.h"
 
-#ifndef  __phdsp__
-
-#include <iostream>
-
-#endif // !__phdsp__
-
-#ifndef  __phdsp__
+#if DEBUG
 namespace Dev
 {
   enum EJBoxPropertyState {
@@ -29,7 +26,7 @@ namespace Dev
   };
 
 }
-#endif // !__phdsp__
+#endif
 
 /**
 * Encapsulates an object (with full path).
@@ -37,11 +34,11 @@ namespace Dev
 class JBoxObject
 {
 public:
-  JBoxObject(char const * iObjectPath);
+  explicit JBoxObject(char const * iObjectPath);
 
   inline JBoxObject &operator=(JBoxObject const &rhs)
   {
-    JBOX_ASSERT_MESSAGE(rhs.fObjectRef == fObjectRef, "mismatch object!");
+    DCHECK_F(rhs.fObjectRef == fObjectRef, "mismatch object!");
     return *this;
   }
 
@@ -58,7 +55,9 @@ public:
 public:
   TJBox_ObjectRef const fObjectRef;
 
+#if DEBUG
   TJBox_ObjectName fObjectPath;
+#endif
 };
 
 /*
@@ -87,16 +86,18 @@ class IJBoxPropertyObserver
 public:
   virtual bool update(const TJBox_PropertyDiff &iPropertyDiff) = 0;
   virtual void init() = 0;
+#if DEBUG
   virtual char const *getPropertyPath() const = 0;
+#endif
   virtual TJBox_PropertyRef const &getPropertyRef() const = 0;
 
   inline void registerForUpdate(IJBoxPropertyManager &manager, TJBox_Tag iTag) { manager.registerForUpdate(*this, iTag); }
   inline void registerForInit(IJBoxPropertyManager &manager) { manager.registerForInit(*this); }
 
-#ifndef  __phdsp__
+#if DEBUG
 public:
   Dev::EJBoxPropertyState fPropertyState = Dev::kUninitialized;
-#endif // !__phdsp__
+#endif
 };
 
 /*
@@ -109,14 +110,18 @@ public:
   JBoxPropertyObserver(char const *iPropertyPath);
 
   //virtual bool update(const TJBox_PropertyDiff &iPropertyDiff) = 0;
+#if DEBUG
   virtual char const *getPropertyPath() const { return fPropertyPath; };
+#endif
   virtual TJBox_PropertyRef const &getPropertyRef() const {return fPropertyRef; };
 
 public:
   TJBox_PropertyRef const fPropertyRef;
 
 private:
+#if DEBUG
   char fPropertyPath[kMaxPropertyPathLen + 1];
+#endif
 };
 
 template<typename T>
@@ -138,12 +143,12 @@ public:
 
 public:
   JBoxProperty(JBoxObject const &parentObject, char const *iPropertyName):
-   JBoxPropertyObserver(parentObject, iPropertyName), fUpdateListener(nullptr)
+   JBoxPropertyObserver(parentObject, iPropertyName)
    {
    }
 
   JBoxProperty(char const *iPropertyPath):
-    JBoxPropertyObserver(iPropertyPath), fUpdateListener(nullptr)
+    JBoxPropertyObserver(iPropertyPath)
   {
   }
 
@@ -162,11 +167,11 @@ public:
   {
     JBOX_ASSERT_MESSAGE(JBox_IsReferencingSameProperty(other.fPropertyRef, fPropertyRef), "mismatch object!");
 
-#ifndef  __phdsp__
+#if DEBUG
     JBOX_ASSERT(fPropertyState != Dev::kInSyncWithMOM);
     JBOX_ASSERT(other.fPropertyState == Dev::kInSyncWithMOM);
     fPropertyState = Dev::kInSyncWithCopy;
-#endif // !__phdsp__
+#endif
 
     fValue = other.getValue();
 
@@ -183,10 +188,10 @@ public:
     T prev = fValue;
     setJBoxValue(iPropertyDiff.fCurrentValue);
 
-#ifndef  __phdsp__
-    JBOX_ASSERT(fPropertyState != Dev::kInSyncWithCopy);
+#if DEBUG
+    DCHECK_F(fPropertyState != Dev::kInSyncWithCopy);
     fPropertyState = Dev::kInSyncWithMOM;
-#endif // !__phdsp__
+#endif
 
     if(fUpdateListener != nullptr)
       fUpdateListener->onPropertyUpdated(prev, fValue);
@@ -199,10 +204,10 @@ public:
    */
   virtual void init()
   {
-#ifndef  __phdsp__
-    JBOX_ASSERT_MESSAGE(fPropertyState == Dev::kUninitialized, (std::string("FAILURE: init() -> property initialized multiple times ") + getPropertyPath()).c_str());
+#if DEBUG
+    DCHECK_F(fPropertyState == Dev::kUninitialized, "FAILURE: init() -> property initialized multiple times %s", getPropertyPath());
     fPropertyState = Dev::kInSyncWithMOM;
-#endif // !__phdsp__
+#endif
     loadValueFromMotherboard();
   }
 
@@ -211,10 +216,10 @@ public:
    */
   void initMotherboard(T iValue)
   {
-#ifndef  __phdsp__
-    JBOX_ASSERT_MESSAGE(fPropertyState == Dev::kUninitialized, (std::string("FAILURE: initMotherboard() -> property initialized multiple times ") + getPropertyPath()).c_str());
+#if DEBUG
+    DCHECK_F(fPropertyState == Dev::kUninitialized, "FAILURE: initMotherboard() -> property initialized multiple times %s", getPropertyPath());
     fPropertyState = Dev::kInSyncWithMOM;
-#endif // !__phdsp__
+#endif
     doSetValue(iValue);
     storeValueToMotherboard();
   }
@@ -224,9 +229,9 @@ public:
    */
   inline T getValue() const {
 
-#ifndef  __phdsp__
-    JBOX_ASSERT_MESSAGE(fPropertyState != Dev::kUninitialized, (std::string("FAILURE: getValue() -> Accessing uninitialized property ") + getPropertyPath()).c_str());
-#endif // !__phdsp__
+#if DEBUG
+    DCHECK_F(fPropertyState != Dev::kUninitialized, "FAILURE: getValue() -> Accessing uninitialized property %s", getPropertyPath());
+#endif
 
     return fValue;
   }
@@ -246,9 +251,9 @@ public:
    */
   bool storeValueToMotherboardOnUpdate(T iValue)
   {
-#ifndef  __phdsp__
-    JBOX_ASSERT_MESSAGE(fPropertyState == Dev::kInSyncWithMOM, (std::string("FAILURE: storeValueToMotherboardOnUpdate() -> should be in sync with MOM ") + getPropertyPath()).c_str());
-#endif // !__phdsp__
+#if DEBUG
+    DCHECK_F(fPropertyState == Dev::kInSyncWithMOM, "FAILURE: storeValueToMotherboardOnUpdate() -> should be in sync with MOM %s", getPropertyPath());
+#endif
 
     auto previousValue = getValue();
 
@@ -292,9 +297,9 @@ private:
   inline T loadValueFromMotherboard()
   {
     setJBoxValue(JBox_LoadMOMProperty(fPropertyRef));
-#ifndef  __phdsp__
+#if DEBUG
     fPropertyState = Dev::kInSyncWithMOM;
-#endif // !__phdsp__
+#endif
     return getValue();
   }
 
@@ -303,21 +308,21 @@ private:
    */
   inline void storeValueToMotherboard()
   {
-#ifndef  __phdsp__
-    JBOX_ASSERT_MESSAGE(fPropertyState != Dev::kUninitialized, (std::string("FAILURE: storeValueToMotherboard() -> Accessing uninitialized property ") + getPropertyPath()).c_str());
-#endif // !__phdsp__
+#if DEBUG
+    DCHECK_F(fPropertyState != Dev::kUninitialized, "FAILURE: storeValueToMotherboard() -> Accessing uninitialized property %s", getPropertyPath());
+#endif
 
     JBox_StoreMOMProperty(fPropertyRef, getJBoxValue());
 
-#ifndef  __phdsp__
+#if DEBUG
     fPropertyState = Dev::kInSyncWithMOM;
-#endif // !__phdsp__
+#endif
   }
 
 
 private:
-  T fValue;
-  JBoxPropertyUpdateListener<T> *fUpdateListener;
+  T fValue{};
+  JBoxPropertyUpdateListener<T> *fUpdateListener{};
 
   inline void setJBoxValue(TJBox_Value value) {
     doSetValue(FromJBoxValue(value));

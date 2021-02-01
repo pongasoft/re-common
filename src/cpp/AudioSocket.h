@@ -36,7 +36,8 @@ protected:
 class AudioInSocket : public AudioSocket
 {
 public:
-  AudioInSocket(char const *iSocketPath) : AudioSocket(iSocketPath)
+  AudioInSocket(char const *iSocketName) :
+    AudioSocket(jbox::PropertyPath::printf("/audio_inputs/%s", iSocketName))
   {
   }
 
@@ -55,7 +56,8 @@ public:
 class AudioOutSocket : public AudioSocket
 {
 public:
-  AudioOutSocket(char const *iSocketPath) : AudioSocket(iSocketPath)
+  explicit AudioOutSocket(char const *iSocketName) :
+    AudioSocket(jbox::PropertyPath::printf("/audio_outputs/%s", iSocketName))
   {
   }
 
@@ -97,10 +99,17 @@ public:
 class StereoInPair : public StereoPair
 {
 public:
-  StereoInPair(char const *iLeftSocketPath, char const *iRightSocketPath) :
-      fLeftSocket(iLeftSocketPath), fRightSocket(iRightSocketPath)
+  StereoInPair(char const *iLeftSocketName, char const *iRightSocketName) :
+    fLeftSocket(iLeftSocketName), fRightSocket(iRightSocketName)
   {
   }
+
+  explicit StereoInPair(char const *iSocketName) :
+    fLeftSocket(jbox::PropertyName::printf("%sLeft", iSocketName)),
+    fRightSocket(jbox::PropertyName::printf("%sRight", iSocketName))
+  {
+  }
+
 
   virtual AudioSocket &getLeftSocket();
 
@@ -127,10 +136,17 @@ public:
 class StereoOutPair : public StereoPair
 {
 public:
-  StereoOutPair(char const *iLeftSocketPath, char const *iRightSocketPath) :
-      fLeftSocket(iLeftSocketPath), fRightSocket(iRightSocketPath)
+  StereoOutPair(char const *iLeftSocketName, char const *iRightSocketName) :
+    fLeftSocket(iLeftSocketName), fRightSocket(iRightSocketName)
   {
   }
+
+  explicit StereoOutPair(char const *iSocketName) :
+    fLeftSocket(jbox::PropertyName::printf("%sLeft", iSocketName)),
+    fRightSocket(jbox::PropertyName::printf("%sRight", iSocketName))
+  {
+  }
+
 
   virtual AudioSocket &getLeftSocket();
 

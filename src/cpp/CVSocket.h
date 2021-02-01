@@ -16,7 +16,7 @@ template <typename T>
 class TCVSocket
 {
 public:
-  TCVSocket(char const *iSocketPath):
+  explicit TCVSocket(char const *iSocketPath):
     iSocketObject(iSocketPath), fConnected(iSocketObject, "connected"), fValue(iSocketObject, "value") {}
 
   virtual void registerForUpdate(IJBoxPropertyManager &manager) = 0;
@@ -41,7 +41,9 @@ template <typename T>
 class TCVInSocket: public TCVSocket<T>
 {
 public:
-  TCVInSocket(char const *iSocketPath): TCVSocket<T>(iSocketPath) {};
+  explicit TCVInSocket(char const *iSocketName) :
+    TCVSocket<T>(jbox::ObjectPath::printf("/cv_inputs/%s", iSocketName))
+  {};
 
   virtual void registerForUpdate(IJBoxPropertyManager &manager) {
     manager.registerForUpdate(this->fConnected, kJBox_CVInputConnected);
@@ -69,7 +71,9 @@ template <typename T>
 class TCVOutSocket: public TCVSocket<T>
 {
 public:
-  TCVOutSocket(char const *iSocketPath): TCVSocket<T>(iSocketPath) {};
+  explicit TCVOutSocket(char const *iSocketName) :
+    TCVSocket<T>(jbox::ObjectPath::printf("/cv_outputs/%s", iSocketName))
+  {};
 
   virtual void registerForUpdate(IJBoxPropertyManager &manager)
   {
