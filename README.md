@@ -28,6 +28,61 @@ List of projects using this mini framework
 Release notes
 -------------
 
+#### 3.0.0 - 2021/02/02
+
+- Added `fmt` namespace that implements a simplified version of `printf` mostly for use in property name creation
+- Added `jbox` namespace that implements the `JBox_GetMotherboardObjectRef` and `JBox_MakePropertyRef` Jukebox API
+  calls using `fmt::printf` syntax. For example:
+ 
+```cpp
+int N = 4;
+for(int i = 0; i < N; i++)
+{
+  fSampleNativeObjectRefs[i] = 
+    jbox::get_property_ref("/custom_properties/sample_sound_native_object%d", i);
+}
+```
+
+- Added `StaticString` which encapsulates an immutable array of characters (underlying type varies depending on debug 
+  or release mode) to provide a simple syntax to create strings: 
+
+```cpp
+auto s = StaticString<100>::printf("test %s / %d", "abc", 12);
+
+// ObjectPath is StaticString<kJBox_MaxObjectNameLen + 1>
+fSampleObjectRef = JBox_GetMotherboardObjectRef(ObjectPath::printf("/user_samples/%d", 1));
+
+// which is 100% equivalent to
+fSampleObjectRef = jbox::get_object_ref("/user_samples/%d", 1);
+```  
+
+##### Warning Warning Warning : Breaking changes
+
+- The `AudioInSocket`,  `AudioOutSocket`, `StereoInPair` and `StereoOutPair` constructors now takes socket name 
+  instead of full socket path since the path can be computed by the class (and is less error prone):
+  
+```cpp
+// old code
+StereoOutPair audioOut{"/audio_outputs/mainOutLeft", "/audio_outputs/mainOutRight"};
+
+// new code
+StereoOutPair audioOut{"mainOutLeft", "mainOutRight"};
+
+// which can also be simplified to (new in 3.0.0)
+StereoOutPair audioOut{"mainOut"};
+```
+
+- The `CVInSocket` and `CVOutSocket` constructors now takes socket name instead of full socket path since the path 
+  can be computed by the class (and is less error prone):
+  
+```cpp
+// old code
+CVOutSocket cvOut{"/cv_outputs/cv_out_socket"};
+
+// new code
+CVOutSocket cvOut{"cv_out_socket"};
+```
+
 #### 2.0.0 - 2020/06/20
 
 - Assumes RE SDK Version 4.1.0+
