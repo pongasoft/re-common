@@ -28,6 +28,10 @@ List of projects using this mini framework
 Release notes
 -------------
 
+#### 3.0.1 - 2021/09/27
+
+- Fixed loguru included in universal45 and failing build
+
 #### 3.0.0 - 2021/02/02
 
 - Added `fmt` namespace that implements a simplified version of `printf` mostly for use in property name creation
