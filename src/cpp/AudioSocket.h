@@ -64,9 +64,21 @@ public:
   virtual void registerForUpdate(IJBoxPropertyManager &manager);
 
   template<int size>
-  void writeAudio(TAudioBuffer<size> const &iAudioBuffer) const
+  inline void writeAudio(TAudioBuffer<size> const &iAudioBuffer) const
   {
     iAudioBuffer.writeAudio(JBox_LoadMOMPropertyByTag(iSocketObject.fObjectRef, kJBox_AudioOutputBuffer));
+  }
+
+  template<int size>
+  inline bool maybeWriteAudio(TAudioBuffer<size> const &iAudioBuffer) const
+  {
+    if(!iAudioBuffer.isSilent())
+    {
+      writeAudio(iAudioBuffer);
+      return true;
+    }
+
+    return false;
   }
 
 };
@@ -161,6 +173,15 @@ public:
   {
     fLeftSocket.writeAudio(iStereoAudioBuffer.fLeftAudioBuffer);
     fRightSocket.writeAudio(iStereoAudioBuffer.fRightAudioBuffer);
+  }
+
+  template<int size>
+  bool maybeWriteAudio(TStereoAudioBuffer<size> const &iStereoAudioBuffer) const
+  {
+    bool res = false;
+    res |= fLeftSocket.maybeWriteAudio(iStereoAudioBuffer.fLeftAudioBuffer);
+    res |= fRightSocket.maybeWriteAudio(iStereoAudioBuffer.fRightAudioBuffer);
+    return res;
   }
 
   AudioOutSocket fLeftSocket;
