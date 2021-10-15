@@ -31,15 +31,23 @@ const TJBox_Float64 MAX_CV_VALUE = 10000;
 constexpr auto MAX_TJbox_Float64 = std::numeric_limits<TJBox_Float64>::max();
 
 template <typename T>
-inline static T clamp(TJBox_Float64 value, int lower, int upper)
+static constexpr T clamp(TJBox_Float64 value, int lower, int upper)
 {
   return static_cast<T>(value < lower ? lower : (value > upper ? upper : value));
 }
 
-template <typename T>
-inline static const T& clamp2(const T &value, const T &lower, const T &upper)
+/**
+ * Make sure that the value remains within its bounds
+ *
+ * @param iValue the value to clamp between `iLower` and `iUpper`
+ * @param iLower the lower bound (must be <= iUpper)
+ * @param iUpper the upper bound (must be >= iLower)
+ */
+template <typename T, typename U>
+static constexpr T clamp2(const U &iValue, const T &iLower, const T &iUpper)
 {
-  return value < lower ? lower : (value > upper ? upper : value);
+  auto v = static_cast<T>(iValue);
+  return v < iLower ? iLower : (v > iUpper ? iUpper : v);
 }
 
 inline static double batchDurationMillis(int iSampleRate)

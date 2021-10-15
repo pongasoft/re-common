@@ -42,6 +42,7 @@ set(re-common_BUILD_HEADERS
     ${RE_COMMON_CPP_SRC_DIR}/JBoxPropertyManager.h
     ${RE_COMMON_CPP_SRC_DIR}/JukeboxExports.h
     ${RE_COMMON_CPP_SRC_DIR}/Utils.h
+    ${RE_COMMON_CPP_SRC_DIR}/SampleRateBasedClock.h
     ${RE_COMMON_CPP_SRC_DIR}/StaticString.h
     ${RE_COMMON_CPP_SRC_DIR}/Volume.h
     ${RE_COMMON_CPP_SRC_DIR}/XFade.h

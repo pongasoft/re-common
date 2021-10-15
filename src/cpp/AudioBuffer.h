@@ -21,6 +21,8 @@ public:
 public:
   TAudioBuffer() {};
 
+  constexpr int getSize() const { return size; }
+
   void readAudio(TJBox_Value const &audioValue)
   {
     JBox_GetDSPBufferData(audioValue, 0, size, fAudioBuffer);
