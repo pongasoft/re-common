@@ -242,9 +242,23 @@ public:
   inline bool isSameValue(class_type const &other) const { return getValue() == other.getValue(); }
 
   /**
- * Shortcut to compare previous and current properties
- */
+   * Shortcut to compare previous and current properties
+   */
   inline bool isNotSameValue(class_type const &other) const { return getValue() != other.getValue(); }
+
+  /**
+   * Checks this value against `ioPreviousValue` and update `ioPreviousValue` with the new value if changed
+   * @return `true` if the value has changed, `false` otherwise */
+  inline bool updatePreviousValueOnChange(T &ioPreviousValue) const
+  {
+    if(getValue() != ioPreviousValue)
+    {
+      ioPreviousValue = getValue();
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * Conditionnally stores the value passed in this property and propagate the motherboard if different only
