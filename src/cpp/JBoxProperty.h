@@ -251,9 +251,17 @@ public:
    * @return `true` if the value has changed, `false` otherwise */
   inline bool updatePreviousValueOnChange(T &ioPreviousValue) const
   {
-    if(getValue() != ioPreviousValue)
+    return updatePreviousValueOnChange(getValue(), ioPreviousValue);
+  }
+
+  /**
+   * Checks `iNewValue` against `ioPreviousValue` and update `ioPreviousValue` with the new value if changed
+   * @return `true` if the value has changed, `false` otherwise */
+  static constexpr bool updatePreviousValueOnChange(T const &iNewValue, T &ioPreviousValue)
+  {
+    if(iNewValue != ioPreviousValue)
     {
-      ioPreviousValue = getValue();
+      ioPreviousValue = iNewValue;
       return true;
     }
 

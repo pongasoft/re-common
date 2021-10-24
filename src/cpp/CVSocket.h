@@ -139,4 +139,106 @@ typedef JBoxProperty<TJBox_Int32, JBox::toNote, JBox::fromNote> NoteJBoxProperty
 typedef TCVInSocket<NoteJBoxProperty> CVInNote;
 typedef TCVOutSocket<Float64JBoxProperty> CVOutSocket;
 
+/**
+ * This class implements the common behavior when a custom property has an equivalent CV In socket.
+ *
+ * When CV is connected, any change in the property itself will override the CV value. */
+template<typename jbox_property_type, typename cv_property_type = jbox_property_type>
+class CVInProperty
+{
+public:
+  using value_type = typename jbox_property_type::value_type;
+  using cv_mapper_type = std::function<value_type(typename cv_property_type::value_type)>;
+
+public:
+  /**
+   * Constructor expecting the full path to the property itself (ex: `/custom_properties/my_prop`) and
+   * the name of the CV In socket (ex: `my_prop_cv`). */
+  CVInProperty(char const *iPropertyPath, char const *iCVInSocketName) :
+    fProperty{iPropertyPath},
+    fCVInSocket{iCVInSocketName}
+  {}
+
+  /**
+   * @return the value of the property */
+  inline value_type getValue() const { return fCurrentValue; }
+
+  /**
+   * Registers both the property (with the provided tag) and the cv in socket */
+  void registerForUpdate(IJBoxPropertyManager &iMgr, TJBox_Tag iPropertyTag)
+  {
+    iMgr.registerForUpdate(fProperty, iPropertyTag);
+    fCVInSocket.registerForUpdate(iMgr);
+  }
+
+  /**
+   * Needs to be called after the motherboard was updated to "compute" the new current value
+   *
+   * @param iCVInValueMapper optional mapper to adapt the CV In value (for example, the meaning could change
+   *                         based on other parameters, like a unipolar/bipolar switch)
+   * @return `true` if the value has changed since the previous time this method was called
+   */
+  bool afterMotherboardUpdate(cv_mapper_type iCVInValueMapper = staticCast);
+
+private:
+  static constexpr value_type staticCast(typename cv_property_type::value_type v) { return static_cast<value_type>(v); }
+
+private:
+  jbox_property_type fProperty;
+  TCVInSocket<cv_property_type> fCVInSocket;
+
+  value_type fCurrentValue{};
+  value_type fPropertyValue{};
+  typename cv_property_type::value_type fCVInValue{};
+  bool fCVInConnected{};
+};
+
+//------------------------------------------------------------------------
+// CVInProperty::afterMotherboardUpdate
+//------------------------------------------------------------------------
+template<typename jbox_property_type, typename cv_property_type>
+bool CVInProperty<jbox_property_type, cv_property_type>::afterMotherboardUpdate(cv_mapper_type iCVInValueMapper)
+{
+  auto previousValue = fCurrentValue;
+
+  if(fProperty.updatePreviousValueOnChange(fPropertyValue))
+  {
+    fCurrentValue = fPropertyValue;
+    if(fCVInSocket.isConnected())
+    {
+      fCVInConnected = true;
+      fCVInValue = fCVInSocket.getValue();
+    }
+  }
+  else
+  {
+    if(fCVInConnected) // was cv connected
+    {
+      if(fCVInSocket.isConnected()) // cv still connected
+      {
+        if(cv_property_type::updatePreviousValueOnChange(fCVInSocket.getValue(), fCVInValue))
+        {
+          fCurrentValue = iCVInValueMapper(fCVInValue);
+        }
+      }
+      else // cv no longer connected
+      {
+        fCVInConnected = false;
+        fCurrentValue = fPropertyValue;
+      }
+    }
+    else // cv was not connected
+    {
+      if(fCVInSocket.isConnected()) // cv newly connected
+      {
+        fCVInConnected = true;
+        fCVInValue = fCVInSocket.getValue();
+        fCurrentValue = iCVInValueMapper(fCVInValue);
+      }
+    }
+  }
+
+  return previousValue != fCurrentValue;
+}
+
 #endif //__PongasoftCommon_CVSocket_h__
