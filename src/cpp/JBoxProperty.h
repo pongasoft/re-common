@@ -424,6 +424,12 @@ typedef JBoxProperty<TJBox_Float64, JBox::toJBoxFloat64, JBox::fromJBoxFloat64> 
 typedef JBoxProperty<TJBox_Float32, JBox::toJBoxFloat32, JBox::fromJBoxFloat32> Float32JBoxProperty;
 typedef JBoxProperty<TJBox_Int32, JBox::toJBoxInt32, JBox::fromJBoxInt32> Int32JBoxProperty;
 
+/**
+ * Shortcut definition when the property is read only. */
+template<typename T, T (* FromJBoxValue)(TJBox_Value)>
+using ReadOnlyJBoxProperty = JBoxProperty<T, FromJBoxValue, JBox::readOnly>;
+
+
 // BuiltIn OnOffByPass for effects
 class BuiltInOnOffBypassJBoxProperty : public JBoxProperty<TJBox_OnOffBypassStates, JBox::toEnum<TJBox_OnOffBypassStates>, JBox::fromEnum<TJBox_OnOffBypassStates> >
 {
