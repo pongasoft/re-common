@@ -304,6 +304,15 @@ public:
 
 private:
   /**
+   * Loads the raw value from the MOM. Note that this method does NOT modify this object.
+   * Use `loadValue` / `storeValueToMotherboardOnUpdate` in general */
+  inline TJBox_Value loadRawValue() const { return JBox_LoadMOMProperty(fPropertyRef); }
+
+  /**
+   * Stores the raw value to the MOM. Note that this method does NOT modify this object */
+  inline void storeRawValue(TJBox_Value const &iValue) const { JBox_StoreMOMProperty(fPropertyRef, iValue); }
+
+  /**
    * Sets the value only (not propagated to motherboard!)
    * Note that it is private because it should only be used by this class: dangerous as it leaves this property not in sync
    */
@@ -312,13 +321,13 @@ private:
     fValue = iValue;
   }
 
- /**
+  /**
   * Unconditionnaly loads the value from the MOM
   * Note this method could be public if there is a need for not using the update mechanism, keeping private for now
   */
   inline T loadValueFromMotherboard()
   {
-    setJBoxValue(JBox_LoadMOMProperty(fPropertyRef));
+    setJBoxValue(loadRawValue());
 #if DEBUG
     fPropertyState = Dev::kInSyncWithMOM;
 #endif
@@ -334,7 +343,7 @@ private:
     DCHECK_F(fPropertyState != Dev::kUninitialized, "FAILURE: storeValueToMotherboard() -> Accessing uninitialized property %s", getPropertyPath());
 #endif
 
-    JBox_StoreMOMProperty(fPropertyRef, getJBoxValue());
+    storeRawValue(getJBoxValue());
 
 #if DEBUG
     fPropertyState = Dev::kInSyncWithMOM;
@@ -358,64 +367,74 @@ private:
 namespace JBox
 {
 // TJBox_Bool
-  inline TJBox_Bool toJBoxBool(TJBox_Value value)
-  {
-    return JBox_GetBoolean(value);
-  }
-  inline TJBox_Value fromJBoxBool(TJBox_Bool value)
-  {
-    return JBox_MakeBoolean(value);
-  }
+inline TJBox_Bool toJBoxBool(TJBox_Value value)
+{
+  return JBox_GetBoolean(value);
+}
+inline TJBox_Value fromJBoxBool(TJBox_Bool value)
+{
+  return JBox_MakeBoolean(value);
+}
 
 // TJBox_Float64
-  inline TJBox_Float64 toJBoxFloat64(TJBox_Value value)
-  {
-    return JBox_GetNumber(value);
-  }
-  inline TJBox_Value fromJBoxFloat64(TJBox_Float64 value)
-  {
-    return JBox_MakeNumber(value);
-  }
+inline TJBox_Float64 toJBoxFloat64(TJBox_Value value)
+{
+  return JBox_GetNumber(value);
+}
+inline TJBox_Value fromJBoxFloat64(TJBox_Float64 value)
+{
+  return JBox_MakeNumber(value);
+}
 
 // TJBox_Float32
-  inline TJBox_Float32 toJBoxFloat32(TJBox_Value value)
-  {
-    return static_cast<TJBox_Float32>(JBox_GetNumber(value));
-  }
-  inline TJBox_Value fromJBoxFloat32(TJBox_Float32 value)
-  {
-    return JBox_MakeNumber(value);
-  }
+inline TJBox_Float32 toJBoxFloat32(TJBox_Value value)
+{
+  return static_cast<TJBox_Float32>(JBox_GetNumber(value));
+}
+inline TJBox_Value fromJBoxFloat32(TJBox_Float32 value)
+{
+  return JBox_MakeNumber(value);
+}
 
-  // TJBox_Int32
-  inline TJBox_Int32 toJBoxInt32(TJBox_Value value)
-  {
-    return static_cast<TJBox_Int32>(JBox_GetNumber(value));
-  }
-  inline TJBox_Value fromJBoxInt32(TJBox_Int32 value)
-  {
-    return JBox_MakeNumber(value);
-  }
+// TJBox_Int32
+inline TJBox_Int32 toJBoxInt32(TJBox_Value value)
+{
+  return static_cast<TJBox_Int32>(JBox_GetNumber(value));
+}
+inline TJBox_Value fromJBoxInt32(TJBox_Int32 value)
+{
+  return JBox_MakeNumber(value);
+}
 
-  // Enum type
-  template <typename E>
-  inline E toEnum(TJBox_Value value)
-  {
-    return static_cast<E>((int) JBox_GetNumber(value));
-  }
-  template <typename E>
-  inline TJBox_Value fromEnum(E value)
-  {
-    return JBox_MakeNumber(value);
-  }
+// Enum type
+template <typename E>
+inline E toEnum(TJBox_Value value)
+{
+  return static_cast<E>((int) JBox_GetNumber(value));
+}
+template <typename E>
+inline TJBox_Value fromEnum(E value)
+{
+  return JBox_MakeNumber(value);
+}
 
-  // For Read Only properties
-  template <typename T>
-  inline TJBox_Value readOnly(T value)
-  {
-    (void) value; // unused
-    throw "should not be reached";
-  }
+// For Read Only properties
+template <typename T>
+inline TJBox_Value illegalWrite(T value)
+{
+  (void) value; // unused
+  JBOX_ASSERT_MESSAGE(false, "should not be reached");
+  return JBox_MakeNil(); // never reached but makes the compiler happy...
+}
+
+// For Write Only properties
+template <typename T>
+inline T illegalRead(TJBox_Value value)
+{
+  (void) value; // unused
+  JBOX_ASSERT_MESSAGE(false, "should not be reached");
+  return 0; // never reached but makes the compiler happy...
+}
 
 }
 
@@ -427,7 +446,12 @@ typedef JBoxProperty<TJBox_Int32, JBox::toJBoxInt32, JBox::fromJBoxInt32> Int32J
 /**
  * Shortcut definition when the property is read only. */
 template<typename T, T (* FromJBoxValue)(TJBox_Value)>
-using ReadOnlyJBoxProperty = JBoxProperty<T, FromJBoxValue, JBox::readOnly>;
+using ReadOnlyJBoxProperty = JBoxProperty<T, FromJBoxValue, JBox::illegalWrite>;
+
+/**
+ * Shortcut definition when the property is write only. */
+template<typename T, TJBox_Value (*ToJBoxValue)(T)>
+using WriteOnlyJBoxProperty = JBoxProperty<T, JBox::illegalRead, ToJBoxValue>;
 
 
 // BuiltIn OnOffByPass for effects
