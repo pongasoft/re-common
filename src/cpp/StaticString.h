@@ -115,9 +115,43 @@ public:
   template<typename... Args>
   constexpr static StaticString<N> printf(char const *iFormat, Args &&... args) noexcept;
 
+  /**
+   * Compares 2 static strings according to the rules of `strncmp`
+   * @return `0` if equal, `<0` if this is less than `iOther` and `>0` if this is greater than `iOther` */
+  template<size_t M>
+  inline int compare(StaticString<M> const &iOther) const noexcept
+  {
+    return strncmp(c_str(), iOther.c_str(), std::min(N, M));
+  }
+
 private:
   char_array_type<N> fString;
 };
+
+template<size_t N, size_t M>
+bool operator<(StaticString<N> const &lhs, StaticString<M> const &rhs)
+{
+  return lhs.compare(rhs) < 0;
+}
+
+template<size_t N, size_t M>
+bool operator>(StaticString<N> const &lhs, StaticString<M> const &rhs)
+{
+  return rhs < lhs;
+}
+
+template<size_t N, size_t M>
+bool operator<=(StaticString<N> const &lhs, StaticString<M> const &rhs)
+{
+  return !(rhs < lhs);
+}
+
+template<size_t N, size_t M>
+bool operator>=(StaticString<N> const &lhs, StaticString<M> const &rhs)
+{
+  return !(lhs < rhs);
+}
+
 
 //------------------------------------------------------------------------
 // StaticString<N>::printf implementation

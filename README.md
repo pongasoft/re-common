@@ -32,6 +32,8 @@ Release notes
 
 - Added `maybeWriteAudio` call to check for silent buffers when writing
 - Added `SPLerp`/`DPLerp` and `SampleRateBasedClock` (imported from Jamba)
+- Added `CVInProperty`
+- Added unit test for re-common itself/working on it
 
 #### 3.0.1 - 2021/09/27
 
