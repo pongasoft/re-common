@@ -131,26 +131,81 @@ public:
   virtual void onPropertyUpdated(T const &previousValue, T const &newValue) = 0;
 };
 
+namespace JBox
+{
+// defaultFromJBoxValue<T>
+template <typename T>
+inline void defaultFromJBoxValue(TJBox_Value iValue, T &oValue) { oValue = static_cast<T>(JBox_GetNumber(iValue)); }
+
+// defaultFromJBoxValue<TJBox_Bool> (specialization)
+template <>
+inline void defaultFromJBoxValue(TJBox_Value iValue, TJBox_Bool &oValue) { oValue = JBox_GetBoolean(iValue); }
+
+// defaultFromJBoxValue<bool> (specialization)
+template <>
+inline void defaultFromJBoxValue(TJBox_Value iValue, bool &oValue) { oValue = static_cast<bool>(JBox_GetBoolean(iValue)); }
+
+// defaultToJBoxValue<T>
+template <typename T>
+inline TJBox_Value defaultToJBoxValue(T iValue) { return JBox_MakeNumber(static_cast<T>(iValue)); }
+
+// defaultToJBoxValue<TJBox_Bool> (specialization)
+template<>
+inline TJBox_Value defaultToJBoxValue(TJBox_Bool iValue) { return JBox_MakeBoolean(iValue); }
+
+// defaultToJBoxValue<TJBox_Bool> (bool)
+template<>
+inline TJBox_Value defaultToJBoxValue(bool iValue) { return JBox_MakeBoolean(iValue); }
+
+// TJBox_Bool
+inline TJBox_Bool toJBoxBool(TJBox_Value value) { return JBox_GetBoolean(value); }
+inline void toJBoxBool(TJBox_Value value, TJBox_Bool &oValue) { oValue = toJBoxBool(value); }
+inline TJBox_Value fromJBoxBool(TJBox_Bool value) { return JBox_MakeBoolean(value); }
+
+// TJBox_Float64
+inline TJBox_Float64 toJBoxFloat64(TJBox_Value value) { return JBox_GetNumber(value); }
+inline void toJBoxFloat64(TJBox_Value value, TJBox_Float64 &oValue) { oValue = JBox_GetNumber(value); }
+inline TJBox_Value fromJBoxFloat64(TJBox_Float64 value) { return JBox_MakeNumber(value); }
+
+// TJBox_Float32
+inline TJBox_Float32 toJBoxFloat32(TJBox_Value value) { return static_cast<TJBox_Float32>(JBox_GetNumber(value)); }
+inline void toJBoxFloat32(TJBox_Value value, TJBox_Float32 &oValue) { oValue = static_cast<TJBox_Float32>(JBox_GetNumber(value)); }
+inline TJBox_Value fromJBoxFloat32(TJBox_Float32 value) { return JBox_MakeNumber(value); }
+
+// TJBox_Int32
+inline TJBox_Int32 toJBoxInt32(TJBox_Value value) { return static_cast<TJBox_Int32>(JBox_GetNumber(value)); }
+inline void toJBoxInt32(TJBox_Value value, TJBox_Int32 &oValue) { oValue = static_cast<TJBox_Int32>(JBox_GetNumber(value)); }
+inline TJBox_Value fromJBoxInt32(TJBox_Int32 value) { return JBox_MakeNumber(value); }
+
+// Enum type
+template <typename E>
+inline E toEnum(TJBox_Value value) { return static_cast<E>((int) JBox_GetNumber(value)); }
+template <typename E>
+inline void toEnum(TJBox_Value value, E &oValue) { oValue = static_cast<E>((int) JBox_GetNumber(value)); }
+template <typename E>
+inline TJBox_Value fromEnum(E value) { return JBox_MakeNumber(value); }
+
+}
+
 /*
  * Actual implementation based on jukebox type
  */
-template<typename T, T (* FromJBoxValue)(TJBox_Value), TJBox_Value (*ToJBoxValue)(T)>
+template<typename T, void (* FromJBoxValue)(TJBox_Value, T&) = JBox::defaultFromJBoxValue<T>, TJBox_Value (*ToJBoxValue)(T) = JBox::defaultToJBoxValue<T>>
 class JBoxProperty : public JBoxPropertyObserver
 {
+  static_assert(FromJBoxValue != nullptr || ToJBoxValue != nullptr, "FromJBoxValue and ToJBoxValue cannot both be nullptr");
+
 public:
   typedef T value_type;
   typedef JBoxProperty<T, FromJBoxValue, ToJBoxValue> class_type;
 
 public:
-  JBoxProperty(JBoxObject const &parentObject, char const *iPropertyName):
-   JBoxPropertyObserver(parentObject, iPropertyName)
-   {
-   }
-
-  JBoxProperty(char const *iPropertyPath):
-    JBoxPropertyObserver(iPropertyPath)
+  JBoxProperty(JBoxObject const &parentObject, char const *iPropertyName, T iInitialValue = {}):
+   JBoxPropertyObserver(parentObject, iPropertyName), fValue{iInitialValue}
   {
   }
+
+  explicit JBoxProperty(char const *iPropertyPath, T iInitialValue = {}): JBoxPropertyObserver(iPropertyPath), fValue{iInitialValue} {}
 
   /**
    * A listener invoked after a property update (only called in update!)
@@ -179,24 +234,32 @@ public:
   }
 
   /**
-   * Called by the mamanager for properties registered for receiving updates
+   * Called by the manager for properties registered for receiving updates
    */
   virtual bool update(const TJBox_PropertyDiff &iPropertyDiff)
   {
-    JBOX_ASSERT_MESSAGE(JBox_IsReferencingSameProperty(iPropertyDiff.fPropertyRef, fPropertyRef), 
-                        "mismatch object!");
-    T prev = fValue;
-    setJBoxValue(iPropertyDiff.fCurrentValue);
+    if constexpr (FromJBoxValue != nullptr)
+    {
+      JBOX_ASSERT_MESSAGE(JBox_IsReferencingSameProperty(iPropertyDiff.fPropertyRef, fPropertyRef),
+                          "mismatch object!");
+      T prev = fValue;
+      setJBoxValue(iPropertyDiff.fCurrentValue);
 
 #if DEBUG
-    DCHECK_F(fPropertyState != Dev::kInSyncWithCopy);
-    fPropertyState = Dev::kInSyncWithMOM;
+      DCHECK_F(fPropertyState != Dev::kInSyncWithCopy);
+      fPropertyState = Dev::kInSyncWithMOM;
 #endif
 
-    if(fUpdateListener != nullptr)
-      fUpdateListener->onPropertyUpdated(prev, fValue);
+      if(fUpdateListener != nullptr)
+        fUpdateListener->onPropertyUpdated(prev, fValue);
 
-    return prev != fValue;
+      return prev != fValue;
+    }
+    else
+    {
+      JBOX_ASSERT_MESSAGE(false, "Write only property. Should not be called.");
+      return false;
+    }
   }
 
   /**
@@ -206,9 +269,13 @@ public:
   {
 #if DEBUG
     DCHECK_F(fPropertyState == Dev::kUninitialized, "FAILURE: init() -> property initialized multiple times %s", getPropertyPath());
-    fPropertyState = Dev::kInSyncWithMOM;
 #endif
-    loadValueFromMotherboard();
+    if constexpr (FromJBoxValue != nullptr)
+      // property can be read => read it from the motherboard
+      loadValueFromMotherboard();
+    else
+      // property cannot be read => initializes the motherboard with initial value
+      initMotherboard(fValue);
   }
 
   /**
@@ -269,7 +336,7 @@ public:
   }
 
   /**
-   * Conditionnally stores the value passed in this property and propagate the motherboard if different only
+   * Conditionally stores the value passed in this property and propagate the motherboard if different only
    */
   bool storeValueToMotherboardOnUpdate(T iValue)
   {
@@ -289,17 +356,15 @@ public:
   }
 
 //  /**
-//   * Unconditionnally stores the value passed in this property and propagate the motherboard (even if current value
-//   * is the same)
+//   * Unconditionally stores the value passed in this property and propagate the motherboard.
 //   */
-//  bool storeValueToMotherboard(T iValue)
+//  void storeValueToMotherboard(T iValue)
 //  {
-//    auto previousValue = getValue();
-//
+//#if DEBUG
+//    fPropertyState = Dev::kInSyncWithMOM;
+//#endif
 //    doSetValue(iValue);
 //    storeValueToMotherboard();
-//
-//    return previousValue != iValue;
 //  }
 
 private:
@@ -352,110 +417,39 @@ private:
 
 
 private:
-  T fValue{};
+  T fValue;
   JBoxPropertyUpdateListener<T> *fUpdateListener{};
 
-  inline void setJBoxValue(TJBox_Value value) {
-    doSetValue(FromJBoxValue(value));
+  inline void setJBoxValue(TJBox_Value value)
+  {
+    static_assert(FromJBoxValue != nullptr, "Write Only Property. Should not be called!");
+    FromJBoxValue(value, fValue);
   }
 
   inline TJBox_Value getJBoxValue() {
+    static_assert(ToJBoxValue != nullptr, "Read Only Property. Should not be called!");
     return ToJBoxValue(fValue);
   }
 };
 
-namespace JBox
-{
-// TJBox_Bool
-inline TJBox_Bool toJBoxBool(TJBox_Value value)
-{
-  return JBox_GetBoolean(value);
-}
-inline TJBox_Value fromJBoxBool(TJBox_Bool value)
-{
-  return JBox_MakeBoolean(value);
-}
 
-// TJBox_Float64
-inline TJBox_Float64 toJBoxFloat64(TJBox_Value value)
-{
-  return JBox_GetNumber(value);
-}
-inline TJBox_Value fromJBoxFloat64(TJBox_Float64 value)
-{
-  return JBox_MakeNumber(value);
-}
-
-// TJBox_Float32
-inline TJBox_Float32 toJBoxFloat32(TJBox_Value value)
-{
-  return static_cast<TJBox_Float32>(JBox_GetNumber(value));
-}
-inline TJBox_Value fromJBoxFloat32(TJBox_Float32 value)
-{
-  return JBox_MakeNumber(value);
-}
-
-// TJBox_Int32
-inline TJBox_Int32 toJBoxInt32(TJBox_Value value)
-{
-  return static_cast<TJBox_Int32>(JBox_GetNumber(value));
-}
-inline TJBox_Value fromJBoxInt32(TJBox_Int32 value)
-{
-  return JBox_MakeNumber(value);
-}
-
-// Enum type
-template <typename E>
-inline E toEnum(TJBox_Value value)
-{
-  return static_cast<E>((int) JBox_GetNumber(value));
-}
-template <typename E>
-inline TJBox_Value fromEnum(E value)
-{
-  return JBox_MakeNumber(value);
-}
-
-// For Read Only properties
-template <typename T>
-inline TJBox_Value illegalWrite(T value)
-{
-  (void) value; // unused
-  JBOX_ASSERT_MESSAGE(false, "should not be reached");
-  return JBox_MakeNil(); // never reached but makes the compiler happy...
-}
-
-// For Write Only properties
-template <typename T>
-inline T illegalRead(TJBox_Value value)
-{
-  (void) value; // unused
-  JBOX_ASSERT_MESSAGE(false, "should not be reached");
-  return 0; // never reached but makes the compiler happy...
-}
-
-}
-
-typedef JBoxProperty<TJBox_Bool, JBox::toJBoxBool, JBox::fromJBoxBool> BooleanJBoxProperty;
-typedef JBoxProperty<TJBox_Float64, JBox::toJBoxFloat64, JBox::fromJBoxFloat64> Float64JBoxProperty;
-typedef JBoxProperty<TJBox_Float32, JBox::toJBoxFloat32, JBox::fromJBoxFloat32> Float32JBoxProperty;
-typedef JBoxProperty<TJBox_Int32, JBox::toJBoxInt32, JBox::fromJBoxInt32> Int32JBoxProperty;
+typedef JBoxProperty<TJBox_Bool> BooleanJBoxProperty;
+typedef JBoxProperty<TJBox_Float64> Float64JBoxProperty;
+typedef JBoxProperty<TJBox_Float32> Float32JBoxProperty;
+typedef JBoxProperty<TJBox_Int32> Int32JBoxProperty;
 
 /**
  * Shortcut definition when the property is read only. */
-template<typename T, T (* FromJBoxValue)(TJBox_Value)>
-using ReadOnlyJBoxProperty = JBoxProperty<T, FromJBoxValue, JBox::illegalWrite>;
+template<typename T, void (* FromJBoxValue)(TJBox_Value, T&) = JBox::defaultFromJBoxValue<T>>
+using ReadOnlyJBoxProperty = JBoxProperty<T, FromJBoxValue, nullptr>;
 
 /**
  * Shortcut definition when the property is write only. */
-template<typename T, TJBox_Value (*ToJBoxValue)(T)>
-using WriteOnlyJBoxProperty = JBoxProperty<T, JBox::illegalRead, ToJBoxValue>;
-
+template<typename T, TJBox_Value (*ToJBoxValue)(T) = JBox::defaultToJBoxValue<T>>
+using WriteOnlyJBoxProperty = JBoxProperty<T, nullptr, ToJBoxValue>;
 
 // BuiltIn OnOffByPass for effects
-class BuiltInOnOffBypassJBoxProperty : public JBoxProperty<TJBox_OnOffBypassStates, JBox::toEnum<TJBox_OnOffBypassStates>, JBox::fromEnum<TJBox_OnOffBypassStates> >
+class BuiltInOnOffBypassJBoxProperty : public JBoxProperty<TJBox_OnOffBypassStates>
 {
 public:
   BuiltInOnOffBypassJBoxProperty() : JBoxProperty("/custom_properties/builtin_onoffbypass")

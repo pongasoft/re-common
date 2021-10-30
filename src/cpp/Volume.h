@@ -28,6 +28,8 @@ inline TJBox_Float32 toVolumeCube(TJBox_Value value)
   return targetGain;
 }
 
+inline void toVolumeCube(TJBox_Value value, TJBox_Float32 &oValue) { oValue = toVolumeCube(value); }
+
 inline TJBox_Value fromVolumeCube(TJBox_Float32 value)
 {
   // (value ^ 1/3) * 0.7f

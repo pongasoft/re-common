@@ -16,8 +16,8 @@ template <typename TJBoxProperty>
 class TCVSocket
 {
 public:
-  explicit TCVSocket(char const *iSocketPath):
-    iSocketObject(iSocketPath), fPropConnected(iSocketObject, "connected"), fPropValue(iSocketObject, "value") {}
+  explicit TCVSocket(char const *iSocketPath, typename TJBoxProperty::value_type iInitialValue = {}):
+    iSocketObject(iSocketPath), fPropConnected(iSocketObject, "connected"), fPropValue(iSocketObject, "value", iInitialValue) {}
 
   virtual void registerForUpdate(IJBoxPropertyManager &manager) = 0;
 
@@ -44,19 +44,14 @@ template <typename TJBoxProperty>
 class TCVOutSocket: public TCVSocket<TJBoxProperty>
 {
 public:
-  explicit TCVOutSocket(char const *iSocketName) :
-    TCVSocket<TJBoxProperty>(jbox::ObjectPath::printf("/cv_outputs/%s", iSocketName))
+  explicit TCVOutSocket(char const *iSocketName, typename TJBoxProperty::value_type iInitialValue = {}) :
+    TCVSocket<TJBoxProperty>(jbox::ObjectPath::printf("/cv_outputs/%s", iSocketName), iInitialValue)
   {};
 
   virtual void registerForUpdate(IJBoxPropertyManager &manager)
   {
     manager.registerForUpdate(this->fPropConnected, kJBox_CVOutputConnected);
     manager.registerForInit(this->fPropValue);
-  }
-
-  void initMotherboard(typename TJBoxProperty::value_type iValue)
-  {
-    this->fPropValue.initMotherboard(iValue);
   }
 
   bool storeValueToMotherboardOnUpdate(typename TJBoxProperty::value_type value)
@@ -108,49 +103,21 @@ public:
 };
 
 namespace JBox {
-/*
-  inline TJBox_Int32 getAsVelocityValue() const { return clamp<TJBox_Int32>(getValue() * 127.f, 0, 127); }
- */
 
-inline TJBox_Int32 toNote(TJBox_Float64 value)
-{
-  return clamp<TJBox_Int32>(value * 127.f + 0.1f, 0, 127);
-}
+inline TJBox_Int32 toNote(TJBox_Float64 value) { return clamp<TJBox_Int32>(value * 127.f + 0.1f, 0, 127); }
+inline TJBox_Int32 toNote(TJBox_Value value) { return toNote(toJBoxFloat64(value)); }
+inline void toNote(TJBox_Value value, TJBox_Int32 &oValue) { oValue = toNote(value); }
 
-inline TJBox_Int32 toNote(TJBox_Value value)
-{
-  return toNote(toJBoxFloat64(value));
-}
+inline TJBox_Value fromNote(TJBox_Int32 value) { return JBox_MakeNumber(value / 127.f); }
 
-inline TJBox_Value fromNote(TJBox_Int32 value)
-{
-  return JBox_MakeNumber(value / 127.f);
-}
+inline TJBox_Int32 toGate(TJBox_Float64 value) { return clamp<TJBox_Int32>(value * 127.f, 0, 127); }
+inline TJBox_Int32 toGate(TJBox_Value value) { return toGate(toJBoxFloat64(value)); }
+inline void toGate(TJBox_Value value, TJBox_Int32 &oValue) { oValue = toGate(value); }
 
-inline TJBox_Int32 toGate(TJBox_Float64 value)
-{
-  return clamp<TJBox_Int32>(value * 127.f, 0, 127);
-}
+inline TJBox_Value fromGate(TJBox_Int32 value) { return JBox_MakeNumber(value / 127.f); }
 
-inline TJBox_Int32 toGate(TJBox_Value value)
-{
-  return toGate(toJBoxFloat64(value));
-}
-
-inline TJBox_Value fromGate(TJBox_Int32 value)
-{
-  return JBox_MakeNumber(value / 127.f);
-}
-
-inline TJBox_Float64 toUnipolarCV(TJBox_Float64 iValue)
-{
-  return clamp2(iValue / 2.0 + 0.5, MIN_CV_VALUE, MAX_CV_VALUE);
-}
-
-inline TJBox_Float64 toBipolarCV(TJBox_Float64 iValue)
-{
-  return clamp2(iValue * 2.0 - 1.0, MIN_CV_VALUE, MAX_CV_VALUE);
-}
+inline TJBox_Float64 toUnipolarCV(TJBox_Float64 iValue) { return clamp2(iValue / 2.0 + 0.5, MIN_CV_VALUE, MAX_CV_VALUE); }
+inline TJBox_Float64 toBipolarCV(TJBox_Float64 iValue) { return clamp2(iValue * 2.0 - 1.0, MIN_CV_VALUE, MAX_CV_VALUE); }
 
 }
 
