@@ -28,6 +28,8 @@
 // local native build => loguru debugging enabled
 #define LOGURU_DEBUG_LOGGING 1
 #define LOGURU_DEBUG_CHECKS 1
+#include <stdexcept>
+#include <string>
 #else
 // jbox build => loguru debugging disabled
 #define LOGURU_DEBUG_LOGGING 0
@@ -68,6 +70,17 @@ inline void JBox_LogValues(const char iFile[], TJBox_Int32 iLine, char const *iM
 	impl::JBox_LogValues(__FILE__, __LINE__, iMessage, __VA_ARGS__)
 #else
 #define JBOX_LOGVALUES(iMessage, ...)
+#endif
+
+#if LOGURU_DEBUG_CHECKS
+/**
+ * This function can be used from tests to replace loguru aborts with exception (which can be checked) */
+inline void loguru_throws_exception()
+{
+  loguru::set_fatal_handler([](const loguru::Message& message) {
+    throw std::runtime_error(std::string(message.prefix) + message.message);
+  });
+}
 #endif
 
 #endif

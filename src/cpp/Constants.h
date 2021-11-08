@@ -71,4 +71,12 @@ inline static bool equals5DP(T const &v1, T const &v2)
   return std::fabs(v1 - v2) < 1e-5;
 }
 
+/**
+ * @return `true` if the note event represents a note "on" even */
+inline constexpr bool isNoteOnEvent(TJBox_NoteEvent const &iNoteEvent) { return iNoteEvent.fVelocity > 0; }
+
+/**
+ * @return `true` if the note event represents a note "off" even */
+inline constexpr bool isNoteOffEvent(TJBox_NoteEvent const &iNoteEvent) { return iNoteEvent.fVelocity == 0; }
+
 #endif /* define(__pongasoft__Constants__) */

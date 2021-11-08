@@ -47,6 +47,8 @@ set(re-common_BUILD_HEADERS
     ${RE_COMMON_CPP_SRC_DIR}/Volume.h
     ${RE_COMMON_CPP_SRC_DIR}/XFade.h
     ${RE_COMMON_CPP_SRC_DIR}/logging/logging.h
+    ${RE_COMMON_CPP_SRC_DIR}/pongasoft/common/StaticVector.hpp
+    ${RE_COMMON_CPP_SRC_DIR}/pongasoft/common/stl.h
   )
 
 # Define the sources for native build only

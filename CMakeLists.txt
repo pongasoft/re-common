@@ -66,7 +66,9 @@ set(target_test "${target}_test")
 set(re-common_CPP_TST_DIR "${CMAKE_CURRENT_LIST_DIR}/test/cpp")
 
 set(TEST_CASE_SOURCES
-    "${re-common_CPP_TST_DIR}/TestStaticString.cpp"
+    "${re-common_CPP_TST_DIR}/test-StaticString.cpp"
+    "${re-common_CPP_TST_DIR}/test-StaticVector.cpp"
+    "${re-common_CPP_TST_DIR}/test-stl.cpp"
     )
 
 add_executable("${target_test}" "${TEST_CASE_SOURCES}")
