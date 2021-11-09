@@ -19,6 +19,7 @@
 #include <pongasoft/common/stl.h>
 #include <gtest/gtest.h>
 #include <vector>
+#include <logging/logging.h>
 
 namespace pongasoft::common::Test {
 
@@ -41,6 +42,15 @@ struct S {
 }
 
 using S = test_stl::S;
+
+TEST(stl, maybe_value)
+{
+  ASSERT_EQ(typeid(std::optional<S>), typeid(stl::maybe_value_t<S>));
+  ASSERT_EQ(typeid(S*), typeid(stl::maybe_value_t<S*>));
+
+  ASSERT_EQ(typeid(std::optional<S>), typeid(decltype(stl::first_or_null(std::vector<S>()))));
+  ASSERT_EQ(typeid(S*), typeid(decltype(stl::first_or_null(std::vector<S*>()))));
+}
 
 TEST(stl, remove_if)
 {
@@ -128,6 +138,20 @@ TEST(stl, first_or_null)
     ASSERT_EQ(std::optional<int>(1), stl::first_or_null(vc));
   }
 
+  // vector<int*>
+  {
+    std::vector<int> s{1, 2, 3, 4, 5};
+
+    std::vector<int *> v{&s[0], &s[1], &s[2], &s[3], &s[4]};
+    const std::vector<int *> vc{&s[0], &s[1], &s[2], &s[3], &s[4]};
+
+    ASSERT_EQ(nullptr, stl::first_or_null(std::vector<int *>{}));
+
+    ASSERT_EQ(&s[0], stl::first_or_null(v));
+
+    ASSERT_EQ(&s[0], stl::first_or_null(vc));
+  }
+
   // vector<S>
   {
     std::vector<S> v{S{1}, S{2}, S{3}, S{4}, S{5}};
@@ -175,6 +199,20 @@ TEST(stl, find_if_or_null)
 
     ASSERT_EQ(std::nullopt, stl::find_if_or_null(vc, [](auto i) { return i > 100; }));
     ASSERT_EQ(std::optional<int>(2), stl::find_if_or_null(vc, [](auto i) { return i % 2 == 0; }));
+  }
+
+  // vector<int *>
+  {
+    std::vector<int> s{1, 2, 3, 4, 5};
+
+    std::vector<int *> v{&s[0], &s[1], &s[2], &s[3], &s[4]};
+    const std::vector<int *> vc{&s[0], &s[1], &s[2], &s[3], &s[4]};
+
+    ASSERT_EQ(nullptr, stl::find_if_or_null(v, [](auto i) { return *i > 100; }));
+    ASSERT_EQ(&s[1], stl::find_if_or_null(v, [](auto i) { return *i % 2 == 0; }));
+
+    ASSERT_EQ(nullptr, stl::find_if_or_null(vc, [](auto i) { return *i > 100; }));
+    ASSERT_EQ(&s[1], stl::find_if_or_null(vc, [](auto i) { return *i % 2 == 0; }));
   }
 
   // vector<S>

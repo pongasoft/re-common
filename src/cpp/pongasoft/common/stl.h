@@ -79,35 +79,67 @@ inline constexpr bool contains_if(Container const &iContainer, Predicate iPredic
 }
 
 /**
- * Returns the first element (wrapped in a `std::optional`) of a container if the container is not empty otherwise
- * it returns `std::nullopt`
+ * Define the concept of a potential value returned which can either be an `std::optional<T>` if `T` is a normal
+ * type (ex: `int`, `std::string`, etc...) or simply `T` if `T` is a pointer. A non existent value is represented
+ * by either `std::nullopt` for normal types and `nullptr` for pointers (the "natural" non existent pointer).
+ */
+template<typename T, typename Enable = void>
+struct maybe_value
+{
+  using type = std::optional<std::remove_const_t<std::remove_reference_t<T>>>;
+  constexpr type value(T const &v) const { return v; }
+  constexpr type null() const { return std::nullopt; }
+};
+
+/**
+ * Specialization for pointers */
+template<typename T>
+struct maybe_value<T, typename std::enable_if<std::is_pointer_v<std::remove_const_t<std::remove_reference_t<T>>>>::type>
+{
+  using type = std::remove_const_t<std::remove_reference_t<T>>;
+  constexpr type value(T const &v) const { return v; }
+  constexpr type null() const { return nullptr; }
+};
+
+//! Shortcut to access the type
+template<typename T>
+using maybe_value_t = typename maybe_value<T>::type;
+
+/**
+ * Returns the first element of a container if the container is not empty otherwise it returns "null".
+ *
+ * If the container contains pointers, then the pointer is returned if it exists otherwise it returns `nullptr`
+ * Otherwise (`int`, classes, etc...), an `std::optional<>` is returned if it exists, otherwise it returns `std::nullopt`
  *
  * @note Since `std::optional` does NOT accept references, unlike `iContainer.first()` which returns a reference
  *       to the first element, this call returns a copy of the first element. */
 template<typename Container>
-inline constexpr auto first_or_null(Container const &iContainer)
--> std::optional<typename std::remove_const_t<std::remove_reference_t<decltype(*std::begin(iContainer))>>>
+inline constexpr auto first_or_null(Container const &iContainer) -> maybe_value_t<decltype(*std::begin(iContainer))>
 {
+  maybe_value<decltype(*std::begin(iContainer))> mv;
+
   auto iter = std::cbegin(iContainer);
   if(iter == std::cend(iContainer))
-    return std::nullopt;
+    return mv.null();
   else
-    return *iter;
+    return mv.value(*iter);
 }
 
 /**
  * Similar to `std::find_if` but instead of returning an iterator to the first found element it returns the element
- * itself (wrapped in a `std::optional`) or `std::nullopt` when not found.
+ * itself or `null` when not found. See `first_or_null` for definition of what is actually returned.
  *
  * @see `std::find_if` for more details */
 template<typename Container, typename Predicate>
 inline constexpr auto find_if_or_null(Container const &iContainer, Predicate iPredicate) -> decltype(first_or_null(iContainer))
 {
+  maybe_value<decltype(*std::begin(iContainer))> mv;
+
   auto const iter = std::find_if(std::cbegin(iContainer), std::cend(iContainer), iPredicate);
   if(iter == std::cend(iContainer))
-    return std::nullopt;
+    return mv.null();
   else
-    return *iter;
+    return mv.value(*iter);
 }
 
 /**

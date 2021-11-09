@@ -34,6 +34,8 @@ Release notes
 - Added `SPLerp`/`DPLerp` and `SampleRateBasedClock` (imported from Jamba)
 - Added `CVInProperty`
 - Added unit test for re-common itself/working on it
+- Added `pongasoft::common::stl` namespace with convenient functions for the Standard Template Library
+- Added `StaticVector` which implements the interface of `std::vector` while using static storage
 
 #### 3.0.1 - 2021/09/27
 
