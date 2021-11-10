@@ -57,6 +57,7 @@ Website: www.ilikebigbits.com
 	* Version 2.0.0 - 2018-09-22 - Split loguru.hpp into loguru.hpp and loguru.cpp
 	* Version 2.1.0 - 2019-09-23 - Update fmtlib + add option to loguru::init to NOT set main thread name.
   * Version master @2e1424d575e276e010c072967c0672863c623cbf - 2020-03-31
+  * Added g_preamble_prefix - 2021-11-10
 
 # Compiling
 	Just include <loguru.hpp> where you want to use Loguru.
@@ -367,13 +368,14 @@ namespace loguru
 	LOGURU_EXPORT extern Verbosity g_internal_verbosity;
 
 	// Turn off individual parts of the preamble
-	LOGURU_EXPORT extern bool      g_preamble_date; // The date field
-	LOGURU_EXPORT extern bool      g_preamble_time; // The time of the current day
-	LOGURU_EXPORT extern bool      g_preamble_uptime; // The time since init call
-	LOGURU_EXPORT extern bool      g_preamble_thread; // The logging thread
-	LOGURU_EXPORT extern bool      g_preamble_file; // The file from which the log originates from
-	LOGURU_EXPORT extern bool      g_preamble_verbose; // The verbosity field
-	LOGURU_EXPORT extern bool      g_preamble_pipe; // The pipe symbol right before the message
+	LOGURU_EXPORT extern bool        g_preamble_date; // The date field
+	LOGURU_EXPORT extern bool        g_preamble_time; // The time of the current day
+	LOGURU_EXPORT extern bool        g_preamble_uptime; // The time since init call
+	LOGURU_EXPORT extern bool        g_preamble_thread; // The logging thread
+	LOGURU_EXPORT extern bool        g_preamble_file; // The file from which the log originates from
+	LOGURU_EXPORT extern bool        g_preamble_verbose; // The verbosity field
+	LOGURU_EXPORT extern bool        g_preamble_pipe; // The pipe symbol right before the message
+  LOGURU_EXPORT extern char const *g_preamble_prefix; // The preamble prefix
 
 	// May not throw!
 	typedef void (*log_handler_t)(void* user_data, const Message& message);

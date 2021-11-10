@@ -184,6 +184,7 @@ namespace loguru
 	bool      g_preamble_file     = true;
 	bool      g_preamble_verbose  = true;
 	bool      g_preamble_pipe     = true;
+  char const *g_preamble_prefix = nullptr;
 
 	static std::recursive_mutex  s_mutex;
 	static Verbosity             s_max_out_verbosity = Verbosity_OFF;
@@ -1168,6 +1169,9 @@ namespace loguru
 		if (g_preamble_thread && pos < out_buff_size) {
 			pos += snprintf(out_buff + pos, out_buff_size - pos, "[%-*s]", LOGURU_THREADNAME_WIDTH, " thread name/id");
 		}
+    if (g_preamble_prefix && pos < out_buff_size) {
+      pos += snprintf(out_buff + pos, out_buff_size - pos, "[%-*s]", static_cast<int>(strlen(g_preamble_prefix)), "prefix");
+    }
 		if (g_preamble_file && pos < out_buff_size) {
 			pos += snprintf(out_buff + pos, out_buff_size - pos, "%*s:line  ", LOGURU_FILENAME_WIDTH, "file");
 		}
@@ -1225,6 +1229,10 @@ namespace loguru
 			pos += snprintf(out_buff + pos, out_buff_size - pos, "[%-*s]",
 			               LOGURU_THREADNAME_WIDTH, thread_name);
 		}
+    if (g_preamble_prefix && pos < out_buff_size) {
+      pos += snprintf(out_buff + pos, out_buff_size - pos, "[%s]",
+                      g_preamble_prefix);
+    }
 		if (g_preamble_file && pos < out_buff_size) {
 			char shortened_filename[LOGURU_FILENAME_WIDTH + 1];
 			snprintf(shortened_filename, LOGURU_FILENAME_WIDTH + 1, "%s", file);

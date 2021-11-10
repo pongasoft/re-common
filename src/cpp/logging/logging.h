@@ -73,13 +73,27 @@ inline void JBox_LogValues(const char iFile[], TJBox_Int32 iLine, char const *iM
 #endif
 
 #if LOGURU_DEBUG_CHECKS
+namespace loguru {
+/**
+ * This function can be called when the device is created to make loguru output nicer (essentially replaces
+ * the name of the thread which is useless, by the name of the rack extension which can be useful when you
+ * have different REs using loguru) */
+inline void init_for_re(char const *iREName = nullptr)
+{
+  loguru::g_preamble_thread = false;
+  loguru::g_preamble_prefix = iREName;
+}
+
 /**
  * This function can be used from tests to replace loguru aborts with exception (which can be checked) */
-inline void loguru_throws_exception()
+inline void init_for_test(char const *iPrefix = nullptr)
 {
+  loguru::g_preamble_thread = false;
+  loguru::g_preamble_prefix = iPrefix;
   loguru::set_fatal_handler([](const loguru::Message& message) {
     throw std::runtime_error(std::string(message.prefix) + message.message);
   });
+}
 }
 #endif
 
