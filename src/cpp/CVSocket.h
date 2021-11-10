@@ -81,6 +81,11 @@ public:
 
   inline typename TJBoxProperty::value_type getValue() const { return this->fPropValue.getValue(); }
 
+  inline typename TJBoxProperty::value_type getValue(typename TJBoxProperty::value_type iValueWhenNotConnected) const
+  {
+    return this->isConnected() ? this->getValue() : iValueWhenNotConnected;
+  }
+
   inline bool isSameValue(TCVInSocket<TJBoxProperty> const &other) const
   {
     return this->isConnected() == other.isConnected() && getValue() == other.getValue();
