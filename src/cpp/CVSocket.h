@@ -113,13 +113,15 @@ inline TJBox_Int32 toNote(TJBox_Float64 value) { return clamp<TJBox_Int32>(value
 inline TJBox_Int32 toNote(TJBox_Value value) { return toNote(toJBoxFloat64(value)); }
 inline void toNote(TJBox_Value value, TJBox_Int32 &oValue) { oValue = toNote(value); }
 
-inline TJBox_Value fromNote(TJBox_Int32 value) { return JBox_MakeNumber(value / 127.f); }
+inline TJBox_Float64 fromNoteToCVValue(TJBox_Int32 value) { return value / 127.f; }
+inline TJBox_Value fromNote(TJBox_Int32 value) { return JBox_MakeNumber(fromNoteToCVValue(value)); }
 
 inline TJBox_Int32 toGate(TJBox_Float64 value) { return clamp<TJBox_Int32>(value * 127.f, 0, 127); }
 inline TJBox_Int32 toGate(TJBox_Value value) { return toGate(toJBoxFloat64(value)); }
 inline void toGate(TJBox_Value value, TJBox_Int32 &oValue) { oValue = toGate(value); }
 
-inline TJBox_Value fromGate(TJBox_Int32 value) { return JBox_MakeNumber(value / 127.f); }
+inline TJBox_Float64 fromGateToCVValue(TJBox_Int32 value) { return value / 127.f; }
+inline TJBox_Value fromGate(TJBox_Int32 value) { return JBox_MakeNumber(fromGateToCVValue(value)); }
 
 inline TJBox_Float64 toUnipolarCV(TJBox_Float64 iValue) { return clamp2(iValue / 2.0 + 0.5, MIN_CV_VALUE, MAX_CV_VALUE); }
 inline TJBox_Float64 toBipolarCV(TJBox_Float64 iValue) { return clamp2(iValue * 2.0 - 1.0, MIN_CV_VALUE, MAX_CV_VALUE); }
