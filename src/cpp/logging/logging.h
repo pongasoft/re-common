@@ -67,7 +67,7 @@ inline void JBox_LogValues(const char iFile[], TJBox_Int32 iLine, char const *iM
  * ```
  */
 #define JBOX_LOGVALUES(iMessage, ...) \
-	impl::JBox_LogValues(__FILE__, __LINE__, iMessage, __VA_ARGS__)
+	::impl::JBox_LogValues(__FILE__, __LINE__, iMessage, __VA_ARGS__)
 #else
 #define JBOX_LOGVALUES(iMessage, ...)
 #endif
