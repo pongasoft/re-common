@@ -23,7 +23,6 @@
 
 #include <type_traits>
 #include <optional>
-#include <array>
 #include <algorithm>
 #include <logging/logging.h>
 
@@ -40,16 +39,14 @@ namespace pongasoft::common {
 
 /**
  * The point of this class is to behave like a `std::vector` while having a fixed and static size. Boundaries are
- * checked in `DEBUG` mode but disabled otherwise.
+ * checked in `DEBUG` mode only.
  *
  * The api is supposed to be the same or similar to `std::vector` so refer to the `std::vector` documentation in most
  * cases.
  *
  * @note Because the underlying class is an array, when elements are "removed" from the array (ex by using `drop_back`),
  *       only the size is adjusted, the element itself is never removed/or deleted (which is not allowed during
- *       processing anyway).
- *
- * @todo use `std::array` in `DEBUG` mode and `[]` otherwise*/
+ *       `JBox_Export_RenderRealtime` anyway). */
 template<typename T, std::size_t N>
 class StaticVector
 {
@@ -199,7 +196,7 @@ public:
   constexpr class_type &pop_back() DNOEXCEPT_F { DCHECK_F(any()); fSize--; return *this; }
 
   //! removes the element at the given index
-  constexpr class_type &pop_at(size_t pos) DNOEXCEPT_F { DCHECK_F(pos < fSize); erase(cbegin() + pos); return *this;  }
+  constexpr class_type &pop_at(size_t pos) DNOEXCEPT_F { DCHECK_F(pos >= 0 && pos < fSize); erase(cbegin() + pos); return *this;  }
 
   //! removes the element at the front (note: expensive!)
   constexpr class_type &pop_front() DNOEXCEPT_F { pop_at(0); return *this; }
@@ -212,7 +209,7 @@ public:
   constexpr value_type drop_back() DNOEXCEPT_F { DCHECK_F(!empty()); return fArray[fSize-- - 1]; }
 
   //! like `pop_at` but returns the popped element (must not be empty)
-  constexpr value_type drop_at(size_t pos) DNOEXCEPT_F { DCHECK_F(pos < fSize); value_type res = fArray[pos]; pop_at(pos); return res; }
+  constexpr value_type drop_at(size_t pos) DNOEXCEPT_F { DCHECK_F(pos >= 0 && pos < fSize); value_type res = fArray[pos]; pop_at(pos); return res; }
 
   //! like `pop_front` but returns the popped element (must not be empty)
   constexpr value_type drop_front() DNOEXCEPT_F { value_type res = front(); pop_front(); return res; }
@@ -310,7 +307,7 @@ private:
   }
 
 private:
-  std::array<T, N> fArray; // not initialized on purpose: starts empty!
+  T fArray[N]; // not initialized on purpose: starts empty!
   size_type fSize{};
 };
 
