@@ -6,7 +6,7 @@
 //
 
 #include <Jukebox.h>
-#include "logging/logging.h"
+#include <logging.h>
 #include "JBoxProperty.h"
 #include "jbox.h"
 

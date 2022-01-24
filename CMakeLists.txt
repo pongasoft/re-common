@@ -58,7 +58,7 @@ target_include_directories(${target} PUBLIC "${RE_SDK_ROOT}/API" ${re-common_INC
 # Testing
 #######################################################
 # Download and unpack googletest at configure time
-include(fetch-GoogleTest.cmake)
+include(cmake/RECommonFetch_googletest.cmake)
 include(GoogleTest)
 
 set(target_test "${target}_test")

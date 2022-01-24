@@ -28,7 +28,7 @@ List of projects using this mini framework
 Release notes
 -------------
 
-#### 3.1.0 - xxx
+#### 3.1.0 - 2022-01-24
 
 - Added `maybeWriteAudio` call to check for silent buffers when writing
 - Added `SPLerp`/`DPLerp` and `SampleRateBasedClock` (imported from Jamba)
@@ -36,6 +36,7 @@ Release notes
 - Added unit test for re-common itself/working on it
 - Added `pongasoft::common::stl` namespace with convenient functions for the Standard Template Library
 - Added `StaticVector` which implements the interface of `std::vector` while using static storage
+- Removed logging (fetch `re-logging` instead) => need to change `#include<logging/logging.h>` with `#include<logging.h>`
 
 #### 3.0.1 - 2021/09/27
 

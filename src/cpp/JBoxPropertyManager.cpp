@@ -5,7 +5,7 @@
 #include <Jukebox.h>
 #include "JBoxProperty.h"
 #include "JBoxPropertyManager.h"
-#include <logging/logging.h>
+#include <logging.h>
 
 #if LOCAL_NATIVE_BUILD && RE_COMMON_JBoxPropertyManager_ENABLE_LOGGING
 // Can only include <string> in native build

@@ -19,7 +19,7 @@
 #include <pongasoft/common/stl.h>
 #include <gtest/gtest.h>
 #include <vector>
-#include <logging/logging.h>
+#include <logging.h>
 
 namespace pongasoft::common::Test {
 

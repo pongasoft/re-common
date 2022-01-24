@@ -24,7 +24,7 @@
 #include <type_traits>
 #include <optional>
 #include <algorithm>
-#include <logging/logging.h>
+#include <logging.h>
 
 #include "stl.h"
 

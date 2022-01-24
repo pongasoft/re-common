@@ -14,7 +14,7 @@
 #include "Constants.h"
 #include "JBoxPropertyManager.h"
 #include "JukeboxTypes.h"
-#include "logging/logging.h"
+#include <logging.h>
 
 #if DEBUG
 namespace Dev

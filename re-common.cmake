@@ -17,7 +17,7 @@
 # Defines the location of the sources
 set(RE_COMMON_CPP_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/src/cpp")
 
-message(STATUS "from re-common.cmake ${CMAKE_CURRENT_LIST_DIR}")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/RECommonFetch_re-logging.cmake")
 
 # Defines the sources
 set(re-common_BUILD_SOURCES
@@ -46,17 +46,16 @@ set(re-common_BUILD_HEADERS
     ${RE_COMMON_CPP_SRC_DIR}/StaticString.h
     ${RE_COMMON_CPP_SRC_DIR}/Volume.h
     ${RE_COMMON_CPP_SRC_DIR}/XFade.h
-    ${RE_COMMON_CPP_SRC_DIR}/logging/logging.h
     ${RE_COMMON_CPP_SRC_DIR}/pongasoft/common/StaticVector.hpp
     ${RE_COMMON_CPP_SRC_DIR}/pongasoft/common/stl.h
   )
 
 # Define the sources for native build only
 set(re-common_NATIVE_BUILD_SOURCES
-    ${RE_COMMON_CPP_SRC_DIR}/logging/loguru.cpp
+    ${re-logging_SOURCES}
 )
 
 
 # Defines the include directories
-set(re-common_INCLUDE_DIRECTORIES "${RE_COMMON_CPP_SRC_DIR}")
+set(re-common_INCLUDE_DIRECTORIES "${RE_COMMON_CPP_SRC_DIR}" "${re-logging_INCLUDE_DIRS}")
 

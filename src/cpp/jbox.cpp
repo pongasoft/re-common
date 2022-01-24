@@ -17,7 +17,7 @@
  */
 
 #include "jbox.h"
-#include "logging/logging.h"
+#include <logging.h>
 
 namespace jbox {
 

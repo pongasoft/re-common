@@ -8,7 +8,7 @@
 
 #include "JukeboxTypes.h"
 #include <cmath>
-#include <logging/logging.h>
+#include <logging.h>
 
 namespace Utils {
 
