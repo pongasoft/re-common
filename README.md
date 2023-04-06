@@ -28,6 +28,10 @@ List of projects using this mini framework
 Release notes
 -------------
 
+#### 3.1.1 - 2023-04-06
+
+- Use re-logging 1.0.1 (fix Windows build)
+
 #### 3.1.0 - 2022-01-24
 
 - Added `maybeWriteAudio` call to check for silent buffers when writing

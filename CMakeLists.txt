@@ -22,7 +22,7 @@ cmake_minimum_required(VERSION 3.13)
 project(re-common LANGUAGES CXX)
 set(re-common_VERSION_MAJOR 3)
 set(re-common_VERSION_MINOR 1)
-set(re-common_VERSION_PATCH 0)
+set(re-common_VERSION_PATCH 1)
 set(re-common_VERSION "${re-common_VERSION_MAJOR}.${re-common_VERSION_MINOR}.${re-common_VERSION_PATCH}")
 
 # Using C++17

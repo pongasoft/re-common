@@ -22,7 +22,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/RECommonFetchContent.cmake")
 # Git repo/tag for re-logging
 #------------------------------------------------------------------------
 set(re-logging_GIT_REPO "https://github.com/pongasoft/re-logging" CACHE STRING "re-logging git repository url")
-set(re-logging_GIT_TAG "v1.0.0" CACHE STRING "re-logging git tag")
+set(re-logging_GIT_TAG "v1.0.1" CACHE STRING "re-logging git tag")
 
 re_common_fetch_content(NAME re-logging)
 
