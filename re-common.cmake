@@ -19,14 +19,21 @@ set(RE_COMMON_CPP_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/src/cpp")
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/RECommonFetch_re-logging.cmake")
 
+# The provided JukeboxExports only create the main Device, so if you have a more complex case, involving
+# native objects, you should set this to OFF
+option(RE_COMMON_PROVIDES_JUKEBOX_EXPORTS "Set to OFF is your RE uses native objects" ON)
+
 # Defines the sources
 set(re-common_BUILD_SOURCES
     ${RE_COMMON_CPP_SRC_DIR}/AudioSocket.cpp
     ${RE_COMMON_CPP_SRC_DIR}/JBoxProperty.cpp
     ${RE_COMMON_CPP_SRC_DIR}/JBoxPropertyManager.cpp
-    ${RE_COMMON_CPP_SRC_DIR}/JukeboxExports.cpp
     ${RE_COMMON_CPP_SRC_DIR}/jbox.cpp
   )
+
+if(RE_COMMON_PROVIDES_JUKEBOX_EXPORTS)
+  list(APPEND re-common_BUILD_SOURCES "${RE_COMMON_CPP_SRC_DIR}/JukeboxExports.cpp")
+endif()
 
 # Defines the headers if you want to include them in your project (optional)
 set(re-common_BUILD_HEADERS

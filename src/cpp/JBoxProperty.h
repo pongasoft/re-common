@@ -93,11 +93,6 @@ public:
 
   inline void registerForUpdate(IJBoxPropertyManager &manager, TJBox_Tag iTag) { manager.registerForUpdate(*this, iTag); }
   inline void registerForInit(IJBoxPropertyManager &manager) { manager.registerForInit(*this); }
-
-#if DEBUG
-public:
-  Dev::EJBoxPropertyState fPropertyState = Dev::kUninitialized;
-#endif
 };
 
 /*
@@ -117,6 +112,11 @@ public:
 
 public:
   TJBox_PropertyRef const fPropertyRef;
+
+#if DEBUG
+public:
+  Dev::EJBoxPropertyState fPropertyState = Dev::kUninitialized;
+#endif
 
 private:
 #if DEBUG
@@ -185,7 +185,98 @@ inline void toEnum(TJBox_Value value, E &oValue) { oValue = static_cast<E>((int)
 template <typename E>
 inline TJBox_Value fromEnum(E value) { return JBox_MakeNumber(value); }
 
+// native object
+template <typename T>
+inline void toNativeObjectRO(TJBox_Value value, T const *&oValue) { oValue = reinterpret_cast<T const *>(JBox_GetNativeObjectRO(value)); }
+template <typename T>
+inline void toNativeObjectRW(TJBox_Value value, T *&oValue) { oValue = reinterpret_cast<T *>(JBox_GetNativeObjectRW(value)); }
 }
+
+/*
+ * A property ref is a convenient wrapper to load/store value directly in the motherboard. It can be used in particular,
+ * for properties that must be read from the motherboard each frame (like native objects). */
+template<typename T, void (* FromJBoxValue)(TJBox_Value, T&) = JBox::defaultFromJBoxValue<T>, TJBox_Value (*ToJBoxValue)(T) = JBox::defaultToJBoxValue<T>>
+class JBoxPropertyRef : public JBoxPropertyObserver
+{
+  static_assert(FromJBoxValue != nullptr || ToJBoxValue != nullptr, "FromJBoxValue and ToJBoxValue cannot both be nullptr");
+
+public:
+  using value_type = T;
+  using class_type = JBoxPropertyRef<T, FromJBoxValue, ToJBoxValue>;
+
+public:
+  JBoxPropertyRef(JBoxObject const &parentObject, char const *iPropertyName):
+    JBoxPropertyObserver(parentObject, iPropertyName)
+  {
+  }
+
+  explicit JBoxPropertyRef(char const *iPropertyPath): JBoxPropertyObserver(iPropertyPath) {}
+
+  /**
+   * A listener invoked after a property update (only called in update!)
+   */
+  void setUpdateListener(JBoxPropertyUpdateListener<T> *iUpdateListener)
+  {
+    fUpdateListener = iUpdateListener;
+  }
+
+  inline T loadValue()
+  {
+    return fromJBoxValue(loadRawValue());
+  }
+
+  inline void storeValue(T iValue)
+  {
+    static_assert(ToJBoxValue != nullptr, "Read Only Property. Should not be called!");
+    storeRawValue(ToJBoxValue(iValue));
+  }
+
+  /**
+   * Called by the manager for properties registered for receiving updates
+   */
+  virtual bool update(const TJBox_PropertyDiff &iPropertyDiff)
+  {
+    if constexpr (FromJBoxValue != nullptr)
+    {
+      if(fUpdateListener != nullptr)
+        fUpdateListener->onPropertyUpdated(fromJBoxValue(iPropertyDiff.fPreviousValue), fromJBoxValue(iPropertyDiff.fCurrentValue));
+      return true;
+    }
+    else
+    {
+      JBOX_ASSERT_MESSAGE(false, "Write only property. Should not be called.");
+      return false;
+    }
+  }
+
+  /**
+   * Does nothing in this case */
+  virtual void init()
+  {
+    // nothing
+  }
+
+private:
+  inline T fromJBoxValue(TJBox_Value const &iValue)
+  {
+    static_assert(FromJBoxValue != nullptr, "Write Only Property. Should not be called!");
+    T value{};
+    FromJBoxValue(iValue, value);
+    return value;
+  }
+
+  /**
+   * Loads the raw value from the MOM. Note that this method does NOT modify this object.
+   * Use `loadValue` / `storeValueToMotherboardOnUpdate` in general */
+  inline TJBox_Value loadRawValue() const { return JBox_LoadMOMProperty(fPropertyRef); }
+
+  /**
+   * Stores the raw value to the MOM. Note that this method does NOT modify this object */
+  inline void storeRawValue(TJBox_Value const &iValue) const { JBox_StoreMOMProperty(fPropertyRef, iValue); }
+
+private:
+  JBoxPropertyUpdateListener<T> *fUpdateListener{};
+};
 
 /*
  * Actual implementation based on jukebox type
@@ -447,6 +538,12 @@ using ReadOnlyJBoxProperty = JBoxProperty<T, FromJBoxValue, nullptr>;
  * Shortcut definition when the property is write only. */
 template<typename T, TJBox_Value (*ToJBoxValue)(T) = JBox::defaultToJBoxValue<T>>
 using WriteOnlyJBoxProperty = JBoxProperty<T, nullptr, ToJBoxValue>;
+
+template<typename T>
+using NativeObjectROJboxPropertyRef = JBoxPropertyRef<T const *, JBox::toNativeObjectRO<T>, nullptr>;
+
+template<typename T>
+using NativeObjectRWJboxPropertyRef = JBoxPropertyRef<T *, JBox::toNativeObjectRW<T>, nullptr>;
 
 // BuiltIn OnOffByPass for effects
 class BuiltInOnOffBypassJBoxProperty : public JBoxProperty<TJBox_OnOffBypassStates>
