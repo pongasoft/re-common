@@ -131,6 +131,8 @@ public:
   TStereoAudioBuffer() {}
 
 public:
+  constexpr int getSize() const { return size; }
+
   inline void accumulate(class_type const &rhs)
   {
     fLeftAudioBuffer.accumulate(rhs.fLeftAudioBuffer);

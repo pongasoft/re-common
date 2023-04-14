@@ -141,6 +141,10 @@ inline void defaultFromJBoxValue(TJBox_Value iValue, T &oValue) { oValue = stati
 template <>
 inline void defaultFromJBoxValue(TJBox_Value iValue, TJBox_Bool &oValue) { oValue = JBox_GetBoolean(iValue); }
 
+// defaultFromJBoxValue<TJBox_Value> (specialization) / no op
+template <>
+inline void defaultFromJBoxValue(TJBox_Value iValue, TJBox_Value &oValue) { oValue = iValue; }
+
 // defaultFromJBoxValue<bool> (specialization)
 template <>
 inline void defaultFromJBoxValue(TJBox_Value iValue, bool &oValue) { oValue = static_cast<bool>(JBox_GetBoolean(iValue)); }
@@ -152,6 +156,10 @@ inline TJBox_Value defaultToJBoxValue(T iValue) { return JBox_MakeNumber(static_
 // defaultToJBoxValue<TJBox_Bool> (specialization)
 template<>
 inline TJBox_Value defaultToJBoxValue(TJBox_Bool iValue) { return JBox_MakeBoolean(iValue); }
+
+// defaultToJBoxValue<TJBox_Value> (specialization) / no op
+template<>
+inline TJBox_Value defaultToJBoxValue(TJBox_Value iValue) { return iValue; }
 
 // defaultToJBoxValue<TJBox_Bool> (bool)
 template<>
@@ -220,12 +228,12 @@ public:
     fUpdateListener = iUpdateListener;
   }
 
-  inline T loadValue()
+  inline T loadValue() const
   {
     return fromJBoxValue(loadRawValue());
   }
 
-  inline void storeValue(T iValue)
+  inline void storeValue(T iValue) const
   {
     static_assert(ToJBoxValue != nullptr, "Read Only Property. Should not be called!");
     storeRawValue(ToJBoxValue(iValue));
@@ -257,7 +265,7 @@ public:
   }
 
 private:
-  inline T fromJBoxValue(TJBox_Value const &iValue)
+  static inline T fromJBoxValue(TJBox_Value const &iValue)
   {
     static_assert(FromJBoxValue != nullptr, "Write Only Property. Should not be called!");
     T value{};
@@ -267,7 +275,7 @@ private:
 
   /**
    * Loads the raw value from the MOM. Note that this method does NOT modify this object.
-   * Use `loadValue` / `storeValueToMotherboardOnUpdate` in general */
+   * Use `loadValue` / `storeValue` in general */
   inline TJBox_Value loadRawValue() const { return JBox_LoadMOMProperty(fPropertyRef); }
 
   /**
