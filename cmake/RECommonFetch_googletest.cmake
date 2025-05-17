@@ -18,21 +18,15 @@ cmake_minimum_required(VERSION 3.17)
 
 include("${CMAKE_CURRENT_LIST_DIR}/RECommonFetchContent.cmake")
 
-#------------------------------------------------------------------------
-# The git respository to fetch googletest from
-#------------------------------------------------------------------------
 set(googletest_GIT_REPO "https://github.com/google/googletest" CACHE STRING "googletest git repository URL")
-
-#------------------------------------------------------------------------
-# The git tag for googletest
-# release-1.11.0 => e2239ee6043f73722e7aa812a459f54a28552929
-#------------------------------------------------------------------------
-set(googletest_GIT_TAG "e2239ee6043f73722e7aa812a459f54a28552929" CACHE STRING "googletest git tag")
+set(googletest_GIT_TAG "v1.17.0" CACHE STRING "googletest git tag")
+set(googletest_DOWNLOAD_URL "${googletest_GIT_REPO}/archive/refs/tags/${googletest_GIT_TAG}.zip" CACHE STRING "googletest download url" FORCE)
+set(googletest_DOWNLOAD_URL_HASH "SHA256=40d4ec942217dcc84a9ebe2a68584ada7d4a33a8ee958755763278ea1c5e18ff" CACHE STRING "googletest download url hash" FORCE)
 
 re_common_fetch_content(NAME googletest)
 
 # Prevent overriding the parent project's compiler/linker settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "Set by re-cmake" FORCE)
+set(gtest_force_shared_crt ON CACHE BOOL "Set by re-common" FORCE)
 
 # Do not install GoogleTest!
 option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding googletest may want to turn this OFF.)" OFF)

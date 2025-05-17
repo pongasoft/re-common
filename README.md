@@ -28,6 +28,12 @@ List of projects using this mini framework
 Release notes
 -------------
 
+#### 3.1.2 - 2025-05-17
+
+- Use re-logging 1.0.2
+- Use googletest 1.17.0 (remove CMake deprecation warnings)
+- Use `FetchContent_MakeAvailable` to remove CMake deprecation warnings
+
 #### 3.1.1 - 2023-04-06
 
 - Use re-logging 1.0.1 (fix Windows build)
