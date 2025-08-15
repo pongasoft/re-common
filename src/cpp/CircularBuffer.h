@@ -5,6 +5,8 @@
 #ifndef PongasoftCommon_CIRCULARBUFFER_H
 #define PongasoftCommon_CIRCULARBUFFER_H
 
+#include "Jukebox.h"
+
 template <typename T>
 class CircularBuffer
 {

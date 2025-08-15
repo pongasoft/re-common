@@ -88,7 +88,7 @@ auto gt100_s = [](auto s) { return s.x > 100; };
 // StaticVector - S_constructors
 TEST(StaticVector, S_constructors)
 {
-  loguru::init_for_test("S_constructors");
+  RE_LOGGING_INIT_FOR_TEST("S_constructors");
 
   // default constructor
   check(StaticVector<S, 2>(), V_S());
@@ -124,7 +124,7 @@ TEST(StaticVector, S_constructors)
 // StaticVector - S_iterators
 TEST(StaticVector, S_iterators)
 {
-  loguru::init_for_test("S_iterators");
+  RE_LOGGING_INIT_FOR_TEST("S_iterators");
 
   {
     StaticVector<S, 2> empty{};
@@ -183,7 +183,7 @@ TEST(StaticVector, S_iterators)
 // StaticVector - S_element_access
 TEST(StaticVector, S_element_access)
 {
-  loguru::init_for_test("S_element_access");
+  RE_LOGGING_INIT_FOR_TEST("S_element_access");
 
   {
     StaticVector<S, 2> empty{};
@@ -242,7 +242,7 @@ TEST(StaticVector, S_element_access)
 // StaticVector - S_capacity
 TEST(StaticVector, S_capacity)
 {
-  loguru::init_for_test("S_capacity");
+  RE_LOGGING_INIT_FOR_TEST("S_capacity");
 
   StaticVector<S, 2> empty{};
 
@@ -267,7 +267,7 @@ TEST(StaticVector, S_capacity)
 // StaticVector - S_modifiers_insert
 TEST(StaticVector, S_modifiers_insert)
 {
-  loguru::init_for_test("S_modifiers_insert");
+  RE_LOGGING_INIT_FOR_TEST("S_modifiers_insert");
 
   // push_back
   {
@@ -359,7 +359,7 @@ TEST(StaticVector, S_modifiers_insert)
 // StaticVector - S_modifiers_remove
 TEST(StaticVector, S_modifiers_remove)
 {
-  loguru::init_for_test("S_modifiers_remove");
+  RE_LOGGING_INIT_FOR_TEST("S_modifiers_remove");
 
   // pop (empty)
   {

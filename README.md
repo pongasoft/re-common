@@ -27,6 +27,9 @@ List of projects using this mini framework
 
 Release notes
 -------------
+#### 3.2.0 - 2025-08-15
+
+- Use re-logging 2.0.0 (no loguru dependency)
 
 #### 3.1.2 - 2025-05-17
 

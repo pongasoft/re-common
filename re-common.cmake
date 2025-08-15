@@ -14,6 +14,11 @@
 #
 # @author Yan Pujante
 
+set(re-common_MAJOR_VERSION 3)
+set(re-common_MINOR_VERSION 2)
+set(re-common_PATCH_VERSION 0)
+set(re-common_VERSION "${re-common_MAJOR_VERSION}.${re-common_MINOR_VERSION}.${re-common_PATCH_VERSION}")
+
 # Defines the location of the sources
 set(RE_COMMON_CPP_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/src/cpp")
 
