@@ -452,6 +452,8 @@ TEST(StaticVector, S_modifiers_remove)
 
 TEST(StaticVector, Int)
 {
+  RE_LOGGING_INIT_FOR_TEST("Int");
+
   StaticVector<int, 10> v{{1,2,3,4,5,6}};
   ASSERT_EQ(std::vector<int>({1,2,3,4,5,6}), toVector(v));
 
